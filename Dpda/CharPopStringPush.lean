@@ -30,15 +30,20 @@ structure CPSP_DPDA_IDesc(Q S Γ) where
   w : List S
   β : List Γ
 
+inductive AugmentZ0 Γ where
+  | fromΓ : Γ → AugmentZ0 Γ
+  | z0 : AugmentZ0 Γ
+deriving DecidableEq
+
 abbrev CPSP_Transition Q S Γ :=
-  Q × (Option Γ /- Z₀ -/) → CPSP_Judge Q S Γ
+  Q × (AugmentZ0 Γ) → CPSP_Judge Q S Γ
 
 def CPSP_Judge.stepTransition {Q S Γ}
   (tilde_delta: CPSP_Transition Q S Γ)
   (pwβ: CPSP_DPDA_IDesc Q S Γ)
   : Option (CPSP_DPDA_IDesc Q S Γ) :=
   match pwβ.β with
-  | .nil => match tilde_delta (pwβ.p, none) with
+  | .nil => match tilde_delta (pwβ.p, .z0) with
     | CPSP_Judge.immediate none => none
     | CPSP_Judge.immediate (some (α, q)) => some ⟨q, pwβ.w, α⟩
     | CPSP_Judge.step f => match pwβ.w with
@@ -46,7 +51,7 @@ def CPSP_Judge.stepTransition {Q S Γ}
       | a :: x => match f a with
         | none => none
         | some (α, q) => some ⟨q, x, α⟩
-  | .cons A γ => match tilde_delta (pwβ.p, some A) with
+  | .cons A γ => match tilde_delta (pwβ.p, .fromΓ A) with
     | CPSP_Judge.immediate none => none
     | CPSP_Judge.immediate (some (α, q)) => some ⟨q, pwβ.w, α ++ γ⟩
     | CPSP_Judge.step f => match pwβ.w with

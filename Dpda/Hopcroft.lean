@@ -36,11 +36,39 @@ def Hopcroft_DPDA.toCPSP {Q S Γ} [DecidableEq Q] [DecidableEq Γ] (M: Hopcroft_
   let F : Finset (AugmentOneState Q) := Finset.image (fun (q: Q) => AugmentOneState.fromQ q) M.pda.F
   let new_transition : CPSP_Transition (AugmentOneState Q) S Γ := fun ⟨q', X⟩ =>
     match q', X with
-    | AugmentOneState.qNeg1, none =>
+    | AugmentOneState.qNeg1, .z0 =>
       CPSP_Judge.immediate (some
         (M.pda.z0 :: [], AugmentOneState.fromQ M.pda.q0)
       ) -- protect the stack bottom
-    | AugmentOneState.qNeg1, some _ => CPSP_Judge.immediate none -- stack shall be empty at the start
-    | AugmentOneState.fromQ _, none => CPSP_Judge.immediate none -- stack shall never be empty later
-    | AugmentOneState.fromQ q, some x => Hopcroft_DPDA.Δ M ⟨q, x⟩
+    | AugmentOneState.qNeg1, .fromΓ _ => CPSP_Judge.immediate none -- stack shall be empty at the start
+    | AugmentOneState.fromQ _, .z0 => CPSP_Judge.immediate none -- stack shall never be empty later
+    | AugmentOneState.fromQ q, .fromΓ x => Hopcroft_DPDA.Δ M ⟨q, x⟩
   ⟨q_neg1, F, new_transition⟩
+
+def Hopcroft_DPDA.fromCPSP {Q S Γ} (M_tilde: CPSP_DPDA Q S Γ): Hopcroft_DPDA Q S (AugmentZ0 Γ) :=
+  let q0 := M_tilde.q0
+  let z_0 := AugmentZ0.z0
+  let F := M_tilde.F
+  let new_transition : Q × Option S × AugmentZ0 Γ → Option (Q × List (AugmentZ0 Γ)) :=
+    fun (q, a, X) => match a with
+      | none => match M_tilde.transition (q, X) with
+        | CPSP_Judge.immediate none => none
+        | CPSP_Judge.immediate (some (α, p)) => some (p, α.map AugmentZ0.fromΓ)
+        | CPSP_Judge.step f => none
+      | some a => match M_tilde.transition (q, X) with
+        | CPSP_Judge.immediate _ => none
+        | CPSP_Judge.step f => match f a with
+          | none => none
+          | some (α, p) => some (p, α.map AugmentZ0.fromΓ)
+  let pda : Hopcroft_PreDPDA Q S (AugmentZ0 Γ) := ⟨q0, z_0, F, new_transition⟩
+  let deterministic : (∀ q X, (∃ a, pda.transition (q, some a, X) ≠ none) → pda.transition (q, none, X) = none) := by
+    intros q X h
+    rw [show pda.transition = new_transition from rfl]
+    dsimp only [new_transition]
+    rw [show pda.transition = new_transition from rfl] at h
+    dsimp only [new_transition] at h
+    rcases h with ⟨a, h⟩
+    cases hc : M_tilde.transition (q, X) with
+    | immediate _ => rw [hc] at h; contradiction
+    | step _ => rw [hc] at h
+  ⟨pda, deterministic⟩
