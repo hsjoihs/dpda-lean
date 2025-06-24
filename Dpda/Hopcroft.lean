@@ -72,3 +72,46 @@ def Hopcroft_DPDA.fromCPSP {Q S Γ} (M_tilde: CPSP_DPDA Q S Γ): Hopcroft_DPDA Q
     | immediate _ => rw [hc] at h; contradiction
     | step _ => rw [hc] at h
   ⟨pda, deterministic⟩
+
+structure Hopcroft_DPDA_IDesc(Q S Γ) where
+  p : Q
+  w : List S
+  β : List Γ
+
+def Hopcroft_DPDA.stepTransition {Q S Γ} [DecidableEq Q] [DecidableEq Γ]
+  (M: Hopcroft_DPDA Q S Γ)
+  (pwβ: Hopcroft_DPDA_IDesc Q S Γ)
+  : Option (Hopcroft_DPDA_IDesc Q S Γ) :=
+  let transition := M.pda.transition
+  -- When δ(q, some a, X) contains (p, α),
+  --     (q, aw, Xβ) ⊢ (p, w, α ++ β).
+  -- When δ(q, none, X) contains (p, α),
+  --     (q, w, Xβ) ⊢ (p, w, α ++ β).
+  match pwβ.β with
+  | .nil => none /-
+    This path is implicitly assumed to be unreachable, but we must nevertheless handle it.
+    Hopcroft's model assumes that we can *trust* the machine's designer,
+    such that the stack never becomes empty:
+    the expectation is that, as a *social norm*, one must replenish Z₀ after consuming Z₀ from the stack. -/
+  | X :: β =>
+    match transition (pwβ.p, none, X) with
+    | some (p, α) =>
+      /-
+      -- If δ(q, none, X) is nonempty, we can use the epsilon transition.
+      -- In particular, thanks to the deterministic condition (criterion #2; M.pda.deterministic),
+      -- we know that δ(q, some a, X) is empty for any a in S.
+      -- Thus the only option is to use the epsilon transition.
+
+      -- Note that this reasoning does not need to be proven formally; we can simply assume it.
+      -- We DO need it in order to prove that Hopcroft's DPDA is a subset of Hopcroft's non-deterministic DPDA.
+      -/
+      some ⟨p, pwβ.w, α ++ β⟩
+    | none =>
+      /-
+      -- If δ(q, none, X) is empty, we must use the transition that consumes a symbol from the input.
+      -/
+      match pwβ.w with
+      | .nil => none -- cannot consume from an empty input
+      | a :: w' => match transition (pwβ.p, some a, X) with
+        | some (p, α) => some ⟨p, w', α ++ β⟩
+        | none => none
