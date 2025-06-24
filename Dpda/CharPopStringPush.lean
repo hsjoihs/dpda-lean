@@ -17,22 +17,6 @@ import Mathlib.Data.Finset.Basic
 import Mathlib.Data.Fintype.Basic
 import Mathlib.Data.Fintype.Prod
 
-/-
-
--- Thank you https://github.com/kory33/kripke-game-analysis
-def finsetEquivCharacteristic [Fintype α] [DecidableEq α] : Finset α ≃ (α → Bool) :=
-{ toFun := fun s a => decide (a ∈ s),
-  invFun := fun f => Finset.univ.filter (fun a => f a = true),
-  left_inv := by intro s; simp,
-  right_inv := by intro f; simp
-}
-
--- Thank you https://github.com/kory33/kripke-game-analysis
-def finsetProdEquivCurriedCharacteristic [Fintype α] [Fintype β] [DecidableEq α] [DecidableEq β]
-  : Finset (α × β) ≃ (α → β → Bool) :=
-  finsetEquivCharacteristic.trans (Equiv.curry _ _ _)
--/
-
 -- Glossary:
 -- CPSP = char-pop, string-push
 -- IDesc = Instantaneous Description
