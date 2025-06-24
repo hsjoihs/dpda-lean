@@ -115,3 +115,14 @@ def Hopcroft_DPDA.stepTransition {Q S Γ} [DecidableEq Q] [DecidableEq Γ]
       | a :: w' => match transition (pwβ.p, some a, X) with
         | some (p, α) => some ⟨p, w', α ++ β⟩
         | none => none
+
+def Hopcroft_DPDA.run_n_steps {Q S Γ} [Fintype Q] [DecidableEq Q] [Fintype S /- Σ -/] [Fintype Γ] [DecidableEq Γ]
+  (M: Hopcroft_DPDA Q S Γ) (w: List S) (n: ℕ) : Option (Hopcroft_DPDA_IDesc Q S Γ) :=
+  let step : Hopcroft_DPDA_IDesc Q S Γ -> Option (Hopcroft_DPDA_IDesc Q S Γ) := Hopcroft_DPDA.stepTransition M
+  Nat.repeat
+    (fun idesc =>
+      match idesc with
+      | none => none
+      | some idesc' => step idesc')
+    n
+    (some ⟨M.pda.q0, w, M.pda.z0 :: []⟩)
