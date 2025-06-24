@@ -35,20 +35,60 @@ def finsetProdEquivCurriedCharacteristic [Fintype α] [Fintype β] [DecidableEq 
 
 -- Glossary:
 -- CPSP = char-pop, string-push
--- ID = Instantaneous Description
+-- IDesc = Instantaneous Description
 
 inductive CPSP_Judge Q S Γ
   | immediate : Option (List Γ × Q) → CPSP_Judge Q S Γ
-  | step : S → Option (List Γ × Q) → CPSP_Judge Q S Γ
+  | step : (S → Option (List Γ × Q)) → CPSP_Judge Q S Γ
 
-structure CPSP_DPDA_ID(Q S Γ) where
+structure CPSP_DPDA_IDesc(Q S Γ) where
   p : Q
   w : List S
   β : List Γ
 
-def CPSP_Judge.stepTransition Q S Γ : CPSP_Judge Q S Γ → CPSP_DPDA_ID Q S Γ -> Option (CPSP_DPDA_ID Q S Γ) := sorry
+abbrev CPSP_Transition Q S Γ :=
+  Q × (Option Γ /- Z₀ -/) → CPSP_Judge Q S Γ
 
-structure CPSP_DPDA (Q S Γ) [Fintype Q] [Fintype S /- Σ -/] [Fintype Γ] where
+def CPSP_Judge.stepTransition {Q S Γ}
+  (tilde_delta: CPSP_Transition Q S Γ)
+  (pwβ: CPSP_DPDA_IDesc Q S Γ)
+  : Option (CPSP_DPDA_IDesc Q S Γ) :=
+  match pwβ.β with
+  | .nil => match tilde_delta (pwβ.p, none) with
+    | CPSP_Judge.immediate none => none
+    | CPSP_Judge.immediate (some (α, q)) => some ⟨q, pwβ.w, α⟩
+    | CPSP_Judge.step f => match pwβ.w with
+      | .nil => none
+      | a :: x => match f a with
+        | none => none
+        | some (α, q) => some ⟨q, x, α⟩
+  | .cons A γ => match tilde_delta (pwβ.p, some A) with
+    | CPSP_Judge.immediate none => none
+    | CPSP_Judge.immediate (some (α, q)) => some ⟨q, pwβ.w, α ++ γ⟩
+    | CPSP_Judge.step f => match pwβ.w with
+      | .nil => none
+      | a :: x => match f a with
+        | none => none
+        | some (α, q) => some ⟨q, x, α ++ γ⟩
+
+structure CPSP_DPDA (Q S Γ) where
   q0 : Q
   F : Finset Q
-  transition : Q × (Option Γ /- Z₀ -/) → CPSP_Judge Q S Γ
+  transition : CPSP_Transition Q S Γ
+
+def CPSP_DPDA.run_n_steps {Q S Γ} [Fintype Q] [DecidableEq Q] [Fintype S /- Σ -/] [Fintype Γ]
+  (M: CPSP_DPDA Q S Γ) (w: List S) (n: ℕ) : Option (CPSP_DPDA_IDesc Q S Γ) :=
+  let step : CPSP_DPDA_IDesc Q S Γ -> Option (CPSP_DPDA_IDesc Q S Γ) := CPSP_Judge.stepTransition M.transition
+  Nat.repeat
+    (fun idesc =>
+      match idesc with
+      | none => none
+      | some idesc' => step idesc')
+    n
+    (some ⟨M.q0, w, []⟩)
+
+def CPSP_DPDA.membership_provable_in_n_steps {Q S Γ} [Fintype Q] [DecidableEq Q] [Fintype S /- Σ -/] [Fintype Γ]
+  (M: CPSP_DPDA Q S Γ) (w: List S) (n: ℕ) : Bool :=
+    match CPSP_DPDA.run_n_steps M w n with
+    | none => false
+    | some idesc => idesc.p ∈ M.F
