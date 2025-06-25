@@ -37,3 +37,8 @@ def WobblyFn.fmap {S: Type u_} {U: Type u_} {V: Type u_} (η: U → V) (wf: Wobb
     match f s with
     | none => none
     | some u => some (η u)
+
+def WobblyFn.from {Q: Type u_} {S: Type u_} (k: Q ⊕ (S → Option Q)) : WobblyFn S Q :=
+  match k with
+  | .inl q => WobblyFn.noWant q
+  | .inr f => WobblyFn.want f
