@@ -53,13 +53,19 @@ def Hopcroft_DPDA.fromCPSP {Q S Γ} (M_tilde: CPSP_DPDA Q S Γ): Hopcroft_DPDA Q
     fun (q, a, X) => match a with
       | none => match M_tilde.transition (q, X) with
         | CPSP_Judge.immediate none => none
-        | CPSP_Judge.immediate (some (α, p)) => some (p, α.map AugmentZ0.fromΓ)
+        | CPSP_Judge.immediate (some (α, p)) =>
+            match X with
+            | AugmentZ0.z0 => some (p, (α.map AugmentZ0.fromΓ) ++ [X])
+            | _ => some (p, α.map AugmentZ0.fromΓ)
         | CPSP_Judge.step f => none
       | some a => match M_tilde.transition (q, X) with
         | CPSP_Judge.immediate _ => none
         | CPSP_Judge.step f => match f a with
           | none => none
-          | some (α, p) => some (p, α.map AugmentZ0.fromΓ)
+          | some (α, p) =>
+             match X with
+              | AugmentZ0.z0 => some (p, (α.map AugmentZ0.fromΓ) ++ [X] )
+              | _ => some (p, α.map AugmentZ0.fromΓ)
   let pda : Hopcroft_PreDPDA Q S (AugmentZ0 Γ) := ⟨q0, z_0, F, new_transition⟩
   let deterministic : (∀ q X, (∃ a, pda.transition (q, some a, X) ≠ none) → pda.transition (q, none, X) = none) := by
     intros q X h
@@ -131,7 +137,7 @@ def Hopcroft_DPDA.membership_provable_in_n_steps {Q S Γ} [Fintype Q] [Decidable
   (M: Hopcroft_DPDA Q S Γ) (w: List S) (n: ℕ) : Bool :=
     match Hopcroft_DPDA.run_n_steps M w n with
     | none => false
-    | some idesc => idesc.p ∈ M.pda.F
+    | some idesc => (idesc.p ∈ M.pda.F)  && (idesc.w.length == 0)
 
 
 /--
@@ -140,29 +146,71 @@ def Hopcroft_DPDA.membership_provable_in_n_steps {Q S Γ} [Fintype Q] [Decidable
 
 def Hopcroft_DPDA_IDesc.fromCPSP {Q S Γ} [Fintype Q] [DecidableEq Q] [Fintype S /- Σ -/] [Fintype Γ] [DecidableEq Γ]
   (pwβ: CPSP_DPDA_IDesc Q S Γ) : Hopcroft_DPDA_IDesc Q S (AugmentZ0 Γ) :=
-  ⟨pwβ.p, pwβ.w, pwβ.β.map AugmentZ0.fromΓ⟩
-/-
-theorem CPSP_to_Hopcroft_preserves_semantics_single_step {Q S Γ} [Fintype Q] [DecidableEq Q] [Fintype S /- Σ -/] [Fintype Γ] [DecidableEq Γ]
+  ⟨pwβ.p, pwβ.w, pwβ.β.map AugmentZ0.fromΓ ++ [AugmentZ0.z0]⟩
+
+theorem CPSP_to_Hopcroft_preserves_semantics_single_step {Q S Γ}
+  [Fintype Q] [DecidableEq Q] [Fintype S /- Σ -/] [Fintype Γ] [DecidableEq Γ]
   (M: CPSP_DPDA Q S Γ) (pwβ: CPSP_DPDA_IDesc Q S Γ) :
   let cpsp_after_step : Option (CPSP_DPDA_IDesc Q S Γ) := CPSP_Judge.stepTransition M.transition pwβ
   let hopcroft_after_step : Option (Hopcroft_DPDA_IDesc Q S (AugmentZ0 Γ)) := Hopcroft_DPDA.stepTransition (Hopcroft_DPDA.fromCPSP M) (Hopcroft_DPDA_IDesc.fromCPSP pwβ)
   cpsp_after_step.map Hopcroft_DPDA_IDesc.fromCPSP = hopcroft_after_step := by
     cases h : pwβ.β with
+     | cons X β =>
+      simp [Hopcroft_DPDA_IDesc.fromCPSP, CPSP_Judge.stepTransition, Hopcroft_DPDA.stepTransition, Hopcroft_DPDA.fromCPSP, h]
+      match M.transition (pwβ.p, AugmentZ0.fromΓ X) with
+      | CPSP_Judge.immediate (some (α, p)) =>
+        simp [h]
+        simp [Hopcroft_DPDA_IDesc.fromCPSP]
+      | CPSP_Judge.immediate none =>
+        simp [h]
+        cases h2 : pwβ.w with
+        | nil => simp [h2]
+        | cons _ _ => simp [h2]
+      | CPSP_Judge.step f =>
+        simp [h]
+        cases h2 : pwβ.w with
+        | nil => simp [h2]
+        | cons a x =>
+          simp [h2]
+          cases h3 : f a with
+          | none =>
+            simp [h3]
+          | some u =>
+            let ⟨k,l⟩ := u
+            simp [h3]
+            simp [Hopcroft_DPDA_IDesc.fromCPSP]
      | nil =>
-      simp [Hopcroft_DPDA_IDesc.fromCPSP, CPSP_Judge.stepTransition, Hopcroft_DPDA.stepTransition, h]
-      cases h2 : pwβ.w with
-      | nil =>
-        simp [h2]
-        sorry
-      | cons a x =>
-        sorry
-     | cons X β => sorry
+      simp [Hopcroft_DPDA_IDesc.fromCPSP, CPSP_Judge.stepTransition, Hopcroft_DPDA.stepTransition, Hopcroft_DPDA.fromCPSP, h]
+      match M.transition (pwβ.p, AugmentZ0.z0) with
+      | CPSP_Judge.immediate (some (α, p)) =>
+        simp [h]
+        simp [Hopcroft_DPDA_IDesc.fromCPSP]
+      | CPSP_Judge.immediate none =>
+        simp [h]
+        cases h2 : pwβ.w with
+        | nil => simp [h2]
+        | cons _ _ => simp [h2]
+      | CPSP_Judge.step f =>
+        simp [h]
+        cases h2 : pwβ.w with
+        | nil => simp [h2]
+        | cons a x =>
+          simp [h2]
+          cases h3 : f a with
+          | none =>
+            simp [h3]
+          | some u =>
+            let ⟨k,l⟩ := u
+            simp [h3]
+            simp [Hopcroft_DPDA_IDesc.fromCPSP]
+
+lemma repeat_succ {α} (f : α → α) (n : ℕ) (a : α) :
+  Nat.repeat f (n + 1) a = f (Nat.repeat f n a) := by rfl
 
 theorem CPSP_to_Hopcroft_preserves_semantics {Q S Γ} [Fintype Q] [DecidableEq Q] [Fintype S /- Σ -/] [Fintype Γ] [DecidableEq Γ]
   (M: CPSP_DPDA Q S Γ) (w: List S) (n: ℕ) :
   Hopcroft_DPDA.membership_provable_in_n_steps (Hopcroft_DPDA.fromCPSP M) w n =
   CPSP_DPDA.membership_provable_in_n_steps M w n := sorry
--/
 
 inductive StackSymbol2 : Type
 | A : StackSymbol2
