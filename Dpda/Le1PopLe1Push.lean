@@ -11,12 +11,12 @@ universe u_
 -- Le1P2 = (≤ 1)-pop, (≤ 1)-push
 -- IDesc = Instantaneous Description
 
-inductive WobblyFn (U: Type u_) (V: Type u_) : Type (max u_ u_)
+inductive WobblyFn U V
   | want : (U → Option V) → WobblyFn U V
   | noWant : V → WobblyFn U V
 
 -- wobbly consumption
-def wob {U: Type u_} {V: Type u_} (wf : WobblyFn U V) (s : List U) : Option (V × List U) :=
+def wob {U V} (wf : WobblyFn U V) (s : List U) : Option (V × List U) :=
   match wf with
   | WobblyFn.noWant v => some (v, s)
   | WobblyFn.want f => match s with
@@ -27,7 +27,7 @@ def wob {U: Type u_} {V: Type u_} (wf : WobblyFn U V) (s : List U) : Option (V �
       | some v => some (v, t)
 
 -- wobbly consumption, with the semantics that an empty stack always produces a Z0 when popped
-def wobZ {Γ: Type u_} {V: Type u_} (wf : WobblyFn (AugmentZ0 Γ) V) (β : List Γ) : Option (V × List Γ) :=
+def wobZ {Γ V} (wf : WobblyFn (AugmentZ0 Γ) V) (β : List Γ) : Option (V × List Γ) :=
   match wf with
   | WobblyFn.noWant v => some (v, β)
   | WobblyFn.want f => match β with
@@ -39,19 +39,19 @@ def wobZ {Γ: Type u_} {V: Type u_} (wf : WobblyFn (AugmentZ0 Γ) V) (β : List 
       | none => none
       | some v => some (v, γ)
 
-inductive Le1P2_Judge (Q: Type u_) (S: Type u_) (Γ: Type u_) : Type (max (max u_ u_) u_)
+inductive Le1P2_Judge (Q: Type u_) (S: Type u_) (Γ: Type u_)
   | observeInput : WobblyFn S (WobblyFn (AugmentZ0 Γ) (AugmentEpsilon Γ × Q)) → Le1P2_Judge Q S Γ
   | uncondPop : (AugmentZ0 Γ → Option (WobblyFn S (AugmentEpsilon Γ × Q))) → Le1P2_Judge Q S Γ
 
-structure Le1P2_DPDA_IDesc (Q: Type u_) (S: Type u_) (Γ: Type u_) : Type (max (max u_ u_) u_) where
+structure Le1P2_DPDA_IDesc (Q: Type u_) (S: Type u_) (Γ: Type u_) where
   p : Q
   w : List S
   β : List Γ
 
-abbrev Le1P2_Transition (Q: Type u_) (S: Type u_) (Γ: Type u_) : Type (max (max u_ u_) u_) :=
+abbrev Le1P2_Transition (Q: Type u_) (S: Type u_) (Γ: Type u_) :=
   Q → Le1P2_Judge Q S Γ
 
-structure Le1P2_DPDA (Q: Type u_) (S: Type u_) (Γ: Type u_) : Type (max (max u_ u_) u_) where
+structure Le1P2_DPDA (Q: Type u_) (S: Type u_) (Γ: Type u_) where
   q0 : Q
   F : Finset Q
   transition : Le1P2_Transition Q S Γ
