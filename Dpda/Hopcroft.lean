@@ -126,3 +126,82 @@ def Hopcroft_DPDA.run_n_steps {Q S Γ} [Fintype Q] [DecidableEq Q] [Fintype S /-
       | some idesc' => step idesc')
     n
     (some ⟨M.pda.q0, w, M.pda.z0 :: []⟩)
+
+def Hopcroft_DPDA.membership_provable_in_n_steps {Q S Γ} [Fintype Q] [DecidableEq Q] [Fintype S /- Σ -/] [Fintype Γ] [DecidableEq Γ]
+  (M: Hopcroft_DPDA Q S Γ) (w: List S) (n: ℕ) : Bool :=
+    match Hopcroft_DPDA.run_n_steps M w n with
+    | none => false
+    | some idesc => idesc.p ∈ M.pda.F
+
+
+/--
+ - CPSP --> Hopcroft
+ -/
+
+def Hopcroft_DPDA_IDesc.fromCPSP {Q S Γ} [Fintype Q] [DecidableEq Q] [Fintype S /- Σ -/] [Fintype Γ] [DecidableEq Γ]
+  (pwβ: CPSP_DPDA_IDesc Q S Γ) : Hopcroft_DPDA_IDesc Q S (AugmentZ0 Γ) :=
+  ⟨pwβ.p, pwβ.w, pwβ.β.map AugmentZ0.fromΓ⟩
+/-
+theorem CPSP_to_Hopcroft_preserves_semantics_single_step {Q S Γ} [Fintype Q] [DecidableEq Q] [Fintype S /- Σ -/] [Fintype Γ] [DecidableEq Γ]
+  (M: CPSP_DPDA Q S Γ) (pwβ: CPSP_DPDA_IDesc Q S Γ) :
+  let cpsp_after_step : Option (CPSP_DPDA_IDesc Q S Γ) := CPSP_Judge.stepTransition M.transition pwβ
+  let hopcroft_after_step : Option (Hopcroft_DPDA_IDesc Q S (AugmentZ0 Γ)) := Hopcroft_DPDA.stepTransition (Hopcroft_DPDA.fromCPSP M) (Hopcroft_DPDA_IDesc.fromCPSP pwβ)
+  cpsp_after_step.map Hopcroft_DPDA_IDesc.fromCPSP = hopcroft_after_step := by
+    cases h : pwβ.β with
+     | nil =>
+      simp [Hopcroft_DPDA_IDesc.fromCPSP, CPSP_Judge.stepTransition, Hopcroft_DPDA.stepTransition, h]
+      cases h2 : pwβ.w with
+      | nil =>
+        simp [h2]
+        sorry
+      | cons a x =>
+        sorry
+     | cons X β => sorry
+
+theorem CPSP_to_Hopcroft_preserves_semantics {Q S Γ} [Fintype Q] [DecidableEq Q] [Fintype S /- Σ -/] [Fintype Γ] [DecidableEq Γ]
+  (M: CPSP_DPDA Q S Γ) (w: List S) (n: ℕ) :
+  Hopcroft_DPDA.membership_provable_in_n_steps (Hopcroft_DPDA.fromCPSP M) w n =
+  CPSP_DPDA.membership_provable_in_n_steps M w n := sorry
+-/
+
+inductive StackSymbol2 : Type
+| A : StackSymbol2
+| Z₀ : StackSymbol2
+deriving Ord, BEq, DecidableEq, Repr
+
+instance StackSymbol2.fintype : Fintype StackSymbol2 :=
+  open StackSymbol2 in ⟨⟨{A, Z₀}, by simp⟩, fun x => by cases x <;> simp⟩
+
+def Hopcroft_PreDPDA_anbn : Hopcroft_PreDPDA (Fin 3) Char_ StackSymbol2 where
+  q0 := 0
+  z0 := StackSymbol2.Z₀
+  F := {2}
+  transition := fun (q, u, γ) =>
+    match q, u, γ with
+    | 0, none, _ => none -- no epsilon transition in state 0
+    | 0, some .a, .A => some (0, [StackSymbol2.A, StackSymbol2.A]) -- consume 'a' and push A onto the stack
+    | 0, some .b, .A => some (1, []) -- pop A and move to state 1
+    | 0, some .a, .Z₀ => some (0, [StackSymbol2.A, StackSymbol2.Z₀]) -- consume 'a' and push A onto the stack
+    | 0, some .b, .Z₀ => none -- cannot consume 'b' in state 0 when the stack is empty
+    | 1, some .a, .A => none -- cannot consume 'a' in state 1
+    | 1, some .b, .A => some (1, []) -- consume 'b' and stay in state 1
+    | 1, none, .A => none -- no epsilon transition in state 1 with A on the stack
+    | 1, some .a, .Z₀ => none -- cannot consume 'a' in state 1 when the stack is empty
+    | 1, some .b, .Z₀ => none -- cannot consume 'b' in state 1 when the stack is empty
+    | 1, none, .Z₀ => some (2, []) -- stack is empty; move to the final state
+    | 2, _, _ => none -- final state, no transitions
+
+def Hopcroft_DPDA_anbn : Hopcroft_DPDA (Fin 3) Char_ StackSymbol2 where
+  pda := Hopcroft_PreDPDA_anbn
+  deterministic := by
+    intros q X h
+    match q with
+    | 0 => simp [Hopcroft_PreDPDA_anbn]
+    | 2 => simp [Hopcroft_PreDPDA_anbn]
+    | 1 => match X with
+     | .A => simp [Hopcroft_PreDPDA_anbn]
+     | .Z₀ =>
+        rcases h with ⟨char, h⟩
+        match char with
+        | .a => simp [Hopcroft_PreDPDA_anbn] at h
+        | .b => simp [Hopcroft_PreDPDA_anbn] at h
