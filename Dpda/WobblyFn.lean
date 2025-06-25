@@ -27,3 +27,13 @@ def wobZ {Γ V} (wf : WobblyFn (AugmentZ0 Γ) V) (β : List Γ) : Option (V × L
       match f (AugmentZ0.fromΓ A) with
       | none => none
       | some v => some (v, γ)
+
+universe u_
+
+def WobblyFn.fmap {S: Type u_} {U: Type u_} {V: Type u_} (η: U → V) (wf: WobblyFn S U) : WobblyFn S V :=
+  match wf with
+  | .noWant u => WobblyFn.noWant (η u)
+  | .want f => WobblyFn.want fun s =>
+    match f s with
+    | none => none
+    | some u => some (η u)
