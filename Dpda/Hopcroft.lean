@@ -188,7 +188,7 @@ def Hopcroft_PreDPDA_anbn : Hopcroft_PreDPDA (Fin 3) Char_ StackSymbol2 where
     | 1, none, .A => none -- no epsilon transition in state 1 with A on the stack
     | 1, some .a, .Z₀ => none -- cannot consume 'a' in state 1 when the stack is empty
     | 1, some .b, .Z₀ => none -- cannot consume 'b' in state 1 when the stack is empty
-    | 1, none, .Z₀ => some (2, []) -- stack is empty; move to the final state
+    | 1, none, .Z₀ => some (2, [StackSymbol2.Z₀]) -- stack is empty; move to the final state
     | 2, _, _ => none -- final state, no transitions
 
 def Hopcroft_DPDA_anbn : Hopcroft_DPDA (Fin 3) Char_ StackSymbol2 where
@@ -205,3 +205,16 @@ def Hopcroft_DPDA_anbn : Hopcroft_DPDA (Fin 3) Char_ StackSymbol2 where
         match char with
         | .a => simp [Hopcroft_PreDPDA_anbn] at h
         | .b => simp [Hopcroft_PreDPDA_anbn] at h
+
+def STEP := 4
+def STRING := [Char_.a, Char_.a, Char_.b, Char_.b]
+
+def foo := CPSP_DPDA.run_n_steps CPSP_DPDA_anbn STRING STEP
+#eval match foo with | some ⟨p, _, _⟩ => some p | none => none
+#eval match foo with | some ⟨_, w, _⟩ => some w | none => none
+#eval match foo with | some ⟨_, _, β⟩ => some β | none => none
+
+def hop := Hopcroft_DPDA.run_n_steps Hopcroft_DPDA_anbn STRING STEP
+#eval match hop with | some ⟨p, _, _⟩ => some p | none => none
+#eval match hop with | some ⟨_, w, _⟩ => some w | none => none
+#eval match hop with | some ⟨_, _, β⟩ => some β | none => none
