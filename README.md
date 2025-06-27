@@ -26,7 +26,7 @@ Here, I will present five different formulations of deterministic pushdown autom
 
 1. Predetermined-to-push-or-pop DPDA: [./Dpda/PredeterminedToPushOrPop.lean](./Dpda/PredeterminedToPushOrPop.lean)
 2. Push-or-pop DPDA #1
-3. Push-or-pop DPDA #2
+3. Push-or-pop DPDA #2: [./Dpda/PushOrPop2.lean](./Dpda/PushOrPop2.lean)
 4. (≤1, ≤1)-DPDA: [./Dpda/Le1PopLe1Push.lean](./Dpda/Dpda/Le1PopLe1Push.lean)
 5. Character-popping, string-pushing DPDA (a.k.a. (1, n)-DPDA): [./Dpda/CharPopStringPush.lean](./Dpda/CharPopStringPush.lean)
 

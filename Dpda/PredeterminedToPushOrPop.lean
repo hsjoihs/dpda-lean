@@ -1,6 +1,6 @@
 import Dpda.Basic
 import Dpda.WobblyFn
-import Dpda.PushOrPop
+import Dpda.PushOrPop2
 
 universe u_
 
@@ -32,15 +32,15 @@ structure PTPP_DPDA (Q: Type u_) (S: Type u_) (Γ: Type u_) where
   transition : PTPP_Transition Q S Γ
 
 def PTPP_Judge.embedInPP {Q: Type u_} {S: Type u_} {Γ: Type u_} (M: PTPP_DPDA Q S Γ)
-  : PP_DPDA Q S Γ :=
+  : PP2_DPDA Q S Γ :=
   { q0 := M.q0
   , F := M.F
   , transition := fun q =>
       match M.transition q with
       | PTPP_Judge.popAndDecideWhetherToConsume f =>
-        PP_Judge.uncondPop fun Γz =>
+        PP2_Judge.uncondPop fun Γz =>
           (embedPADWTC f Γz : Option (WobblyFn S Q)).map
           (WobblyFn.fmap fun q => ((), q))
       | PTPP_Judge.uncondPush γq =>
-        PP_Judge.observeInput (WobblyFn.noWant (.inl γq))
+        PP2_Judge.observeInput (WobblyFn.noWant (.inl γq))
   }
