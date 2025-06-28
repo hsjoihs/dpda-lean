@@ -42,3 +42,17 @@ def WobblyFn.from {Q: Type u_} {S: Type u_} (k: Q ⊕ (S → Option Q)) : Wobbly
   match k with
   | .inl q => WobblyFn.noWant q
   | .inr f => WobblyFn.want f
+
+def WobblyFn.isWant {U: Type u_} {V: Type u_}
+  (wf : WobblyFn U V) : Prop :=
+  match wf with
+  | WobblyFn.want _ => True
+  | WobblyFn.noWant _ => False
+
+def WobblyFn.want_ne_nowant {U: Type u_} {V: Type u_}
+   (f : (U → Option V) ) (v : V) : WobblyFn.want f ≠ WobblyFn.noWant v  := by
+  intro h
+  rw [show False = (WobblyFn.noWant v).isWant from by rfl]
+  rw [← h]
+  rw [show (WobblyFn.want f).isWant = True from by rfl]
+  trivial
