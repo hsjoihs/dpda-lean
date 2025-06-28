@@ -19,53 +19,64 @@ theorem CPSP_to_Hopcroft_preserves_semantics_single_step {Q S Γ}
   after_step.map Hopcroft_DPDA_IDesc.fromCPSP = after_step_hop := by
     cases h : idesc.β with
      | cons X β =>
-      simp [Hopcroft_DPDA_IDesc.fromCPSP, CPSP_Judge.stepTransition, Hopcroft_DPDA.stepTransition, Hopcroft_DPDA.fromCPSP, h]
+      simp only [
+        CPSP_Judge.stepTransition,
+        h,
+        Hopcroft_DPDA.stepTransition,
+        Hopcroft_DPDA_IDesc.fromCPSP,
+        Hopcroft_DPDA.fromCPSP,
+        List.map_cons, List.cons_append]
       match M.transition (idesc.p, AugmentZ0.fromΓ X) with
       | CPSP_Judge.immediate (some (α, p)) =>
-        simp [h]
-        simp [Hopcroft_DPDA_IDesc.fromCPSP]
+        simp only [Option.map_some, Option.some.injEq]
+        simp only [Hopcroft_DPDA_IDesc.fromCPSP, List.map_append, List.append_assoc]
       | CPSP_Judge.immediate none =>
-        simp [h]
+        simp only [Option.map_none]
         cases h2 : idesc.w with
-        | nil => simp [h2]
-        | cons _ _ => simp [h2]
+        | nil => simp only
+        | cons _ _ => simp only
       | CPSP_Judge.step f =>
-        simp [h]
+        simp only
         cases h2 : idesc.w with
-        | nil => simp [h2]
+        | nil => simp only [Option.map_none]
         | cons a x =>
-          simp [h2]
+          simp only
           cases h3 : f a with
           | none =>
-            simp [h3]
+            simp only [Option.map_none]
           | some u =>
             let ⟨k,l⟩ := u
-            simp [h3]
-            simp [Hopcroft_DPDA_IDesc.fromCPSP]
+            simp only [Option.map_some, Option.some.injEq]
+            simp only [Hopcroft_DPDA_IDesc.fromCPSP, List.map_append, List.append_assoc]
      | nil =>
-      simp [Hopcroft_DPDA_IDesc.fromCPSP, CPSP_Judge.stepTransition, Hopcroft_DPDA.stepTransition, Hopcroft_DPDA.fromCPSP, h]
+      simp only [
+        CPSP_Judge.stepTransition, h,
+        Hopcroft_DPDA.stepTransition,
+        Hopcroft_DPDA_IDesc.fromCPSP,
+        Hopcroft_DPDA.fromCPSP,
+        List.map_nil, List.nil_append, List.append_nil]
       match M.transition (idesc.p, AugmentZ0.z0) with
       | CPSP_Judge.immediate (some (α, p)) =>
-        simp [h]
-        simp [Hopcroft_DPDA_IDesc.fromCPSP]
+        simp only [Option.map_some, Option.some.injEq]
+        simp only [Hopcroft_DPDA_IDesc.fromCPSP]
       | CPSP_Judge.immediate none =>
-        simp [h]
+        simp only [Option.map_none]
         cases h2 : idesc.w with
-        | nil => simp [h2]
-        | cons _ _ => simp [h2]
+        | nil => simp only
+        | cons _ _ => simp only
       | CPSP_Judge.step f =>
-        simp [h]
+        simp only
         cases h2 : idesc.w with
-        | nil => simp [h2]
+        | nil => simp only [Option.map_none]
         | cons a x =>
-          simp [h2]
+          simp only [h2]
           cases h3 : f a with
           | none =>
-            simp [h3]
+            simp only [Option.map_none]
           | some u =>
             let ⟨k,l⟩ := u
-            simp [h3]
-            simp [Hopcroft_DPDA_IDesc.fromCPSP]
+            simp only [Option.map_some, Option.some.injEq]
+            simp only [Hopcroft_DPDA_IDesc.fromCPSP]
 
 lemma repeat_succ {α} (f : α → α) (n : ℕ) (a : α) :
   Nat.repeat f (n + 1) a = f (Nat.repeat f n a) := by rfl
@@ -86,8 +97,8 @@ lemma repeat_lift_map α β γ
     cases h : Nat.repeat (lift (pick g)) n (some a) with
     | none => rfl
     | some a' =>
-      simp [h]
-      simp [h] at ih
+      simp only [Option.map_some]
+      simp only [h, Option.map_some] at ih
       rw [← th a']
 
 theorem CPSP_to_Hopcroft_preserves_semantics {Q S Γ} [Fintype Q] [DecidableEq Q] [Fintype S /- Σ -/] [Fintype Γ] [DecidableEq Γ]

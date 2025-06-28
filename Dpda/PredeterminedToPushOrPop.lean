@@ -89,9 +89,9 @@ def PTPP_DPDA.embed_commutes {Q: Type u_} {S: Type u_} {Γ: Type u_}
                 match f s with
                 | none => none
                 | some q => some ((), q)) v
-            simp [h, WobblyFn.from]
+            simp only [reduceCtorEq, WobblyFn.from]
           | WobblyFn.want f' =>
-            simp [WobblyFn.from]
+            simp only [WobblyFn.want.injEq, WobblyFn.from]
             rfl
         | some (.inl q) =>
-          simp [WobblyFn.from, WobblyFn.fmap]
+          simp only [Option.some.injEq, WobblyFn.from, Option.map_some, WobblyFn.fmap]

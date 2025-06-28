@@ -38,12 +38,12 @@ def WobblyFn.fmap {S: Type u_} {U: Type u_} {V: Type u_} (η: U → V) (wf: Wobb
     | none => none
     | some u => some (η u)
 
-def WobblyFn.from {Q: Type u_} {S: Type u_} (k: Q ⊕ (S → Option Q)) : WobblyFn S Q :=
+@[simp] def WobblyFn.from {Q: Type u_} {S: Type u_} (k: Q ⊕ (S → Option Q)) : WobblyFn S Q :=
   match k with
   | .inl q => WobblyFn.noWant q
   | .inr f => WobblyFn.want f
 
-def WobblyFn.isWant {U: Type u_} {V: Type u_}
+@[simp] def WobblyFn.isWant {U: Type u_} {V: Type u_}
   (wf : WobblyFn U V) : Prop :=
   match wf with
   | WobblyFn.want _ => True
