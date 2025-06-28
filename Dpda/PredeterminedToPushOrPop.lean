@@ -31,7 +31,7 @@ structure PTPP_DPDA (Q: Type u_) (S: Type u_) (Γ: Type u_) where
   F : Finset Q
   transition : PTPP_Transition Q S Γ
 
-def PTPP_Judge.embedInPP {Q: Type u_} {S: Type u_} {Γ: Type u_} (M: PTPP_DPDA Q S Γ)
+def PTPP_DPDA.embedInPP2 {Q: Type u_} {S: Type u_} {Γ: Type u_} (M: PTPP_DPDA Q S Γ)
   : PP2_DPDA Q S Γ :=
   { q0 := M.q0
   , F := M.F
