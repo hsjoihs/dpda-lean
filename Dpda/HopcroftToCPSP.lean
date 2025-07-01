@@ -58,7 +58,7 @@ theorem Hopcroft_to_CPSP_preserves_semantics_single_step_when_stack_bottom_is_pr
           simp at h2
       | cons head tail =>
         simp [h3]
-        match f head with
+        match hq : f head with
         | none =>
           simp
           unfold Hopcroft_DPDA.Δ at h2
@@ -76,7 +76,10 @@ theorem Hopcroft_to_CPSP_preserves_semantics_single_step_when_stack_bottom_is_pr
             | some (p2, α2) =>
               simp [h5]
               have h6 := M.deterministic
-              sorry
+              simp at h2
+              rw [h4] at h2
+              simp at h2
+              sorry -- function equality in the assumption
         | some val =>
           unfold Hopcroft_DPDA_IDesc.toCPSP
           simp
@@ -89,7 +92,21 @@ theorem Hopcroft_to_CPSP_preserves_semantics_single_step_when_stack_bottom_is_pr
             simp at h2
           | none =>
             simp
-            sorry
+            match h5 : M.pda.transition (idesc.p, some head, A) with
+            | some (p2, α2) =>
+              simp
+              unfold Hopcroft_DPDA.Δ at h2
+              simp at h2
+              rw [h4] at h2
+              simp at h2
+              sorry -- function equality in the assumption
+            | none =>
+              simp
+              unfold Hopcroft_DPDA.Δ at h2
+              simp at h2
+              rw [h4] at h2
+              simp at h2
+              sorry -- False
     | immediate a =>
       cases h3 : idesc.w with
       | nil =>
