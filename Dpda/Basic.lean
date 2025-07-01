@@ -5,7 +5,7 @@ import Mathlib.Data.Fintype.Prod
 import Mathlib.Data.Fintype.Option
 
 
--- Basically (fun u => u >>= f) but avoid using `>>=` directly
+-- Avoid using `>>=` or `bind` directly, to reduce the necessity of `unfold`.
 -- def flipBind {α} : (α → Option α) →  Option α → Option α := flip bind
 def flipBind {α} (f : α → Option α) : Option α → Option α :=
   fun u =>
