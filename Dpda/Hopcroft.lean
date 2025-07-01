@@ -31,19 +31,7 @@ def Hopcroft_DPDA.Δ {Q S Γ} (M: Hopcroft_DPDA Q S Γ) : Q × Γ → CPSP_Judge
       | some (p, α) => some (α, AugmentOneState.fromQ p)
       | none => none
 
-def Hopcroft_DPDA.toCPSP {Q S Γ} [DecidableEq Q] [DecidableEq Γ] (M: Hopcroft_DPDA Q S Γ) : CPSP_DPDA (AugmentOneState Q) S Γ :=
-  let q_neg1 : AugmentOneState Q := AugmentOneState.qNeg1
-  let F : Finset (AugmentOneState Q) := Finset.image (fun (q: Q) => AugmentOneState.fromQ q) M.pda.F
-  let new_transition : CPSP_Transition (AugmentOneState Q) S Γ := fun ⟨q', X⟩ =>
-    match q', X with
-    | AugmentOneState.qNeg1, .z0 =>
-      CPSP_Judge.immediate (some
-        (M.pda.z0 :: [], AugmentOneState.fromQ M.pda.q0)
-      ) -- protect the stack bottom
-    | AugmentOneState.qNeg1, .fromΓ _ => CPSP_Judge.immediate none -- stack shall be empty at the start
-    | AugmentOneState.fromQ _, .z0 => CPSP_Judge.immediate none -- stack shall never be empty later
-    | AugmentOneState.fromQ q, .fromΓ x => Hopcroft_DPDA.Δ M ⟨q, x⟩
-  ⟨q_neg1, F, new_transition⟩
+
 
 def Hopcroft_DPDA.fromCPSP {Q S Γ} (M_tilde: CPSP_DPDA Q S Γ): Hopcroft_DPDA Q S (AugmentZ0 Γ) :=
   let q0 := M_tilde.q0
