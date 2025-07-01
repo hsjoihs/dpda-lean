@@ -242,12 +242,7 @@ theorem Hopcroft_to_CPSP_preserves_semantics_single_step {Q S Γ}
               simp at h2
               rw [h4] at h2
               simp at h2
-              have h_head : (fun a ↦  match M.pda.transition (idesc.p, some a, A) with
-                | some (p, α) => some (α, AugmentOneState.fromQ p)
-                | none => none) head =
-               f head := by
-                 rw [← h2]
-                 rfl
+              have h_head := congr_fun h2 head
               simp [h5, hq] at h_head
         | some val =>
           unfold Hopcroft_DPDA_IDesc.toCPSP
@@ -268,13 +263,7 @@ theorem Hopcroft_to_CPSP_preserves_semantics_single_step {Q S Γ}
               simp at h2
               rw [h4] at h2
               simp at h2
-              have h_head : (fun a ↦
-                  match M.pda.transition (idesc.p, some a, A) with
-                  | some (p, α) => some (α, AugmentOneState.fromQ p)
-                  | none => none) head =
-                f head := by
-                rw [← h2]
-                rfl
+              have h_head := congr_fun h2 head
               simp [h5, hq] at h_head
               apply pair_eq
               exact h_head
@@ -284,11 +273,10 @@ theorem Hopcroft_to_CPSP_preserves_semantics_single_step {Q S Γ}
               simp at h2
               rw [h4] at h2
               simp at h2
-              have h_head : (fun a ↦
-                  match M.pda.transition (idesc.p, some a, A) with
-                  | some (p, α) => some (α, AugmentOneState.fromQ p)
-                  | none => none) head =
-                f head := by
-                rw [← h2]
-                rfl
+              have h_head := congr_fun h2 head
               simp [h5, hq] at h_head
+
+theorem Hopcroft_to_CPSP_preserves_semantics {Q S Γ} [Fintype Q] [DecidableEq Q] [Fintype S /- Σ -/] [Fintype Γ] [DecidableEq Γ]
+  (M: Hopcroft_DPDA Q S Γ) (w: List S) (n: ℕ) :
+  CPSP_DPDA.membership_provable_in_n_steps (Hopcroft_DPDA.toCPSP M) w (n + 1) =
+  Hopcroft_DPDA.membership_provable_in_n_steps M w n := by sorry
