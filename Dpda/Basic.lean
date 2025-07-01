@@ -12,16 +12,16 @@ def lift {α} (f : α → Option α) : Option α → Option α :=
     | none => none
     | some (a: α) => f a
 
+def equiv_fintype {α β} (eqv : α ≃ β) [ft : Fintype α] : Fintype β :=
+  { elems := Fintype.elems.map eqv.toEmbedding,
+    complete := by intro b; simp only [Finset.mem_map_equiv, ft.complete]
+  }
+
 -- $\Gamma_{Z} = \Gamma \cup \{ Z_0 \} $
 inductive AugmentZ0 (Γ: Type u) where
   | fromΓ : Γ → AugmentZ0 Γ
   | z0 : AugmentZ0 Γ
 deriving DecidableEq
-
-def equiv_fintype {α β} (eqv : α ≃ β) [ft : Fintype α] : Fintype β :=
-  { elems := Fintype.elems.map eqv.toEmbedding,
-    complete := by intro b; simp only [Finset.mem_map_equiv, ft.complete]
-  }
 
 def augmentZ0_option_equiv {Γ} : AugmentZ0 Γ ≃ Option Γ :=
   let toFn : AugmentZ0 Γ → Option Γ
