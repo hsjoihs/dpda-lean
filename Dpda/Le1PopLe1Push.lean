@@ -4,6 +4,7 @@ import Mathlib.Data.Fintype.Basic
 import Mathlib.Data.Fintype.Prod
 import Mathlib.Data.Fintype.Option
 import Dpda.Basic
+import Dpda.AugmentSingleton
 import Dpda.WobblyFn
 
 universe u_

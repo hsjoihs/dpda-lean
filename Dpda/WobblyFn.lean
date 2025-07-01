@@ -1,4 +1,5 @@
 import Dpda.Basic
+import Dpda.AugmentSingleton
 
 inductive WobblyFn U V
   | want : (U → Option V) → WobblyFn U V
