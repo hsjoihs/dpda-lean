@@ -163,6 +163,11 @@ theorem Hopcroft_to_CPSP_preserves_semantics_if_transition_is_immediate {Q S Γ}
               | none =>
                 simp
 
+lemma pair_eq {A} {B} {a: A} {b : B} {val} (h:  (a, b) = val) : b = val.2 ∧ a = val.1 := by
+  cases val
+  simp at h
+  exact ⟨ h.2, h.1 ⟩
+
 theorem Hopcroft_to_CPSP_preserves_semantics_single_step {Q S Γ}
   [Fintype Q] [DecidableEq Q] [Fintype S /- Σ -/] [Fintype Γ] [DecidableEq Γ]
   (M: Hopcroft_DPDA Q S Γ) (idesc: Hopcroft_DPDA_IDesc Q S Γ) :
@@ -237,7 +242,13 @@ theorem Hopcroft_to_CPSP_preserves_semantics_single_step {Q S Γ}
               simp at h2
               rw [h4] at h2
               simp at h2
-              sorry -- function equality in the assumption
+              have h_head : (fun a ↦  match M.pda.transition (idesc.p, some a, A) with
+                | some (p, α) => some (α, AugmentOneState.fromQ p)
+                | none => none) head =
+               f head := by
+                 rw [← h2]
+                 rfl
+              simp [h5, hq] at h_head
         | some val =>
           unfold Hopcroft_DPDA_IDesc.toCPSP
           simp
@@ -257,11 +268,27 @@ theorem Hopcroft_to_CPSP_preserves_semantics_single_step {Q S Γ}
               simp at h2
               rw [h4] at h2
               simp at h2
-              sorry -- function equality in the assumption
+              have h_head : (fun a ↦
+                  match M.pda.transition (idesc.p, some a, A) with
+                  | some (p, α) => some (α, AugmentOneState.fromQ p)
+                  | none => none) head =
+                f head := by
+                rw [← h2]
+                rfl
+              simp [h5, hq] at h_head
+              apply pair_eq
+              exact h_head
             | none =>
               simp
               unfold Hopcroft_DPDA.Δ at h2
               simp at h2
               rw [h4] at h2
               simp at h2
-              sorry -- False
+              have h_head : (fun a ↦
+                  match M.pda.transition (idesc.p, some a, A) with
+                  | some (p, α) => some (α, AugmentOneState.fromQ p)
+                  | none => none) head =
+                f head := by
+                rw [← h2]
+                rfl
+              simp [h5, hq] at h_head
