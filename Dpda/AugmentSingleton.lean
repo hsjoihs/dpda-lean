@@ -30,6 +30,25 @@ def augmentZ0_option_equiv {Γ} : AugmentZ0 Γ ≃ Option Γ :=
 
 instance AugmentZ0.fintype {Γ} [ft : Fintype Γ]: Fintype (AugmentZ0 Γ) := equiv_fintype augmentZ0_option_equiv.symm
 
+
+inductive AugmentOneState Q
+  | fromQ : Q → AugmentOneState Q
+  | qNeg1 : AugmentOneState Q
+deriving DecidableEq
+
+def augmentOneState_option_equiv {Q} : AugmentOneState Q ≃ Option Q :=
+  let toFn : AugmentOneState Q → Option Q
+      | AugmentOneState.fromQ g => some g
+      | AugmentOneState.qNeg1 => none
+  let backFn : Option Q → AugmentOneState Q
+      | none => AugmentOneState.qNeg1
+      | some g => AugmentOneState.fromQ g
+  { toFun := toFn, invFun := backFn,
+    left_inv := by intro a; cases a <;> rfl,
+    right_inv := by intro o; cases o <;> rfl }
+
+instance AugmentOneState.fintype {Q} [ft : Fintype Q]: Fintype (AugmentOneState Q) := equiv_fintype augmentOneState_option_equiv.symm
+
 -- $\Gamma_\varepsilon := \{ j \in \Gamma^* \mid \operatorname{len}(j) \le 1 \} \cong \Gamma \cup \{ \varepsilon \} $
 inductive AugmentEpsilon (Γ: Type u) where
   | fromΓ : Γ → AugmentEpsilon Γ

@@ -2,6 +2,7 @@ import Mathlib.Data.Finset.Basic
 import Mathlib.Data.Fintype.Basic
 import Mathlib.Data.Fintype.Prod
 import Dpda.CharPopStringPush
+import Dpda.AugmentSingleton
 
 -- Hopcroft's DPDA definition [Introduction to Automata Theory, Languages, and Computation 3rd edition (page 252)]
 
@@ -16,11 +17,6 @@ structure Hopcroft_DPDA(Q S Γ) where
   pda : Hopcroft_PreDPDA Q S Γ
   -- criterion #2: If $\delta(q,a,X)$ is nonempty, for some $a$ in $\Sigma$, then $\delta(q, \varepsilon, X)$ must be empty.
   deterministic : ∀ q X, (∃ a, pda.transition (q, some a, X) ≠ none) → pda.transition (q, none, X) = none
-
-inductive AugmentOneState Q
-  | fromQ : Q → AugmentOneState Q
-  | qNeg1 : AugmentOneState Q
-deriving DecidableEq
 
 def Hopcroft_DPDA.Δ {Q S Γ} (M: Hopcroft_DPDA Q S Γ) : Q × Γ → CPSP_Judge (AugmentOneState Q) S Γ :=
   fun (q, X) =>
