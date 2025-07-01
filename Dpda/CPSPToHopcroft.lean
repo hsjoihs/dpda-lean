@@ -78,26 +78,6 @@ theorem CPSP_to_Hopcroft_preserves_semantics_single_step {Q S Γ}
             simp only [Option.map_some, Option.some.injEq]
             simp only [Hopcroft_DPDA_IDesc.fromCPSP]
 
-lemma repeat_lift_map α β γ
-  (η_o : α → β)
-  (pick: γ → (α → Option α))
-  (η_f : γ → (β → Option β))
-  (g : γ)
-  (th : ∀ a, ((pick g) a).map η_o = (η_f g) (η_o a))
-  (n : Nat)
-  (a : α) :
-  Nat.repeat (lift (η_f g)) n (some (η_o a)) = (Nat.repeat (lift (pick g)) n (some a)).map η_o := by
-  induction n with
-  | zero => rfl
-  | succ n ih =>
-    simp only [Nat.repeat, lift, ih]
-    cases h : Nat.repeat (lift (pick g)) n (some a) with
-    | none => rfl
-    | some a' =>
-      simp only [Option.map_some]
-      simp only [h, Option.map_some] at ih
-      rw [← th a']
-
 theorem CPSP_to_Hopcroft_preserves_semantics {Q S Γ} [Fintype Q] [DecidableEq Q] [Fintype S /- Σ -/] [Fintype Γ] [DecidableEq Γ]
   (M: CPSP_DPDA Q S Γ) (w: List S) (n: ℕ) :
   Hopcroft_DPDA.membership_provable_in_n_steps (Hopcroft_DPDA.fromCPSP M) w n =
