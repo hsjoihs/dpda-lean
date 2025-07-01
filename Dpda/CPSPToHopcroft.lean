@@ -90,13 +90,13 @@ theorem CPSP_to_Hopcroft_preserves_semantics {Q S Γ} [Fintype Q] [DecidableEq Q
       intro idesc
       exact CPSP_to_Hopcroft_preserves_semantics_single_step M idesc
     let rep :=
-      repeat_lift_map α β γ Hopcroft_DPDA_IDesc.fromCPSP (fun M => CPSP_Judge.stepTransition M.transition) η_f M th n ⟨M.q0, w, []⟩
+      repeat_flipBind_map α β γ Hopcroft_DPDA_IDesc.fromCPSP (fun M => CPSP_Judge.stepTransition M.transition) η_f M th n ⟨M.q0, w, []⟩
     dsimp only [CPSP_DPDA.membership_provable_in_n_steps, CPSP_DPDA.run_n_steps, Hopcroft_DPDA.membership_provable_in_n_steps, Hopcroft_DPDA.run_n_steps, Hopcroft_DPDA_IDesc.fromCPSP]
     dsimp only [Hopcroft_DPDA_IDesc.fromCPSP] at rep
     rw [show (Hopcroft_DPDA.fromCPSP M).pda.q0 = M.q0 from rfl]
     rw [show [(Hopcroft_DPDA.fromCPSP M).pda.z0] = List.map AugmentZ0.fromΓ [] ++ [AugmentZ0.z0] from rfl]
     rw [rep]
     simp only [Option.map, Hopcroft_DPDA.fromCPSP]
-    cases h : Nat.repeat (lift (CPSP_Judge.stepTransition M.transition)) n (some { p := M.q0, w := w, β := [] }) with
+    cases h : Nat.repeat (flipBind (CPSP_Judge.stepTransition M.transition)) n (some { p := M.q0, w := w, β := [] }) with
     | none => rfl
     | some idesc => rfl

@@ -67,7 +67,7 @@ structure CPSP_DPDA (Q S Γ) where
 def CPSP_DPDA.run_n_steps {Q S Γ} [Fintype Q] [DecidableEq Q] [Fintype S /- Σ -/] [Fintype Γ]
   (M: CPSP_DPDA Q S Γ) (w: List S) (n: ℕ) : Option (CPSP_DPDA_IDesc Q S Γ) :=
   let step : CPSP_DPDA_IDesc Q S Γ -> Option (CPSP_DPDA_IDesc Q S Γ) := CPSP_Judge.stepTransition M.transition
-  Nat.repeat (lift step) n (some ⟨M.q0, w, []⟩)
+  Nat.repeat (flipBind step) n (some ⟨M.q0, w, []⟩)
 
 def CPSP_DPDA.membership_provable_in_n_steps {Q S Γ} [Fintype Q] [DecidableEq Q] [Fintype S /- Σ -/] [Fintype Γ]
   (M: CPSP_DPDA Q S Γ) (w: List S) (n: ℕ) : Bool :=

@@ -302,7 +302,7 @@ theorem Hopcroft_to_CPSP_preserves_semantics {Q S Γ} [Fintype Q] [DecidableEq Q
     let α := (Hopcroft_DPDA_IDesc Q S Γ)
     let β := CPSP_DPDA_IDesc (AugmentOneState Q) S Γ
     let γ := Hopcroft_DPDA Q S Γ
-    have h := repeat_lift_map
+    have h := repeat_flipBind_map
       α
       β
       γ
@@ -314,17 +314,17 @@ theorem Hopcroft_to_CPSP_preserves_semantics {Q S Γ} [Fintype Q] [DecidableEq Q
       n
 
     simp at h
-    set k := (lift (CPSP_Judge.stepTransition M.toCPSP.transition) (some { p := M.toCPSP.q0, w := w, β := [] })) with hk2
+    set k := (flipBind (CPSP_Judge.stepTransition M.toCPSP.transition) (some { p := M.toCPSP.q0, w := w, β := [] })) with hk2
     by_cases hk: ∃ a, (some (Hopcroft_DPDA_IDesc.toCPSP a) = k)
     · obtain ⟨ a, hk ⟩ := hk
       have ha := h a
       rw [hk] at ha
       rw [ha]
-      match h2 : Nat.repeat (lift M.stepTransition) n (some a) with
+      match h2 : Nat.repeat (flipBind M.stepTransition) n (some a) with
       | some ⟨p2, w2, β2⟩ =>
         simp only [Hopcroft_DPDA_IDesc.toCPSP, Hopcroft_DPDA.toCPSP]
         rw [hk2] at hk
-        simp [lift, Hopcroft_DPDA_IDesc.toCPSP, Hopcroft_DPDA.toCPSP, CPSP_Judge.stepTransition] at hk
+        simp [flipBind, Hopcroft_DPDA_IDesc.toCPSP, Hopcroft_DPDA.toCPSP, CPSP_Judge.stepTransition] at hk
         obtain ⟨ hp, hw, hβ ⟩ := hk
         rw [← hp, ← hw, ← hβ]
         have haa : (a = ⟨ a.p, a.w, a.β ⟩ ) := by rfl
@@ -339,7 +339,7 @@ theorem Hopcroft_to_CPSP_preserves_semantics {Q S Γ} [Fintype Q] [DecidableEq Q
       | none =>
         simp only [Hopcroft_DPDA_IDesc.toCPSP, Hopcroft_DPDA.toCPSP]
         rw [hk2] at hk
-        simp [lift, Hopcroft_DPDA_IDesc.toCPSP, Hopcroft_DPDA.toCPSP, CPSP_Judge.stepTransition] at hk
+        simp [flipBind, Hopcroft_DPDA_IDesc.toCPSP, Hopcroft_DPDA.toCPSP, CPSP_Judge.stepTransition] at hk
         obtain ⟨ hp, hw, hβ ⟩ := hk
         rw [← hp, ← hw, ← hβ]
         have haa : (a = ⟨ a.p, a.w, a.β ⟩ ) := by rfl
@@ -347,7 +347,7 @@ theorem Hopcroft_to_CPSP_preserves_semantics {Q S Γ} [Fintype Q] [DecidableEq Q
         rw [h2]
         simp
     · rw [hk2] at hk
-      simp only [lift, Hopcroft_DPDA_IDesc.toCPSP, Hopcroft_DPDA.toCPSP, CPSP_Judge.stepTransition] at hk
+      simp only [flipBind, Hopcroft_DPDA_IDesc.toCPSP, Hopcroft_DPDA.toCPSP, CPSP_Judge.stepTransition] at hk
       push_neg at hk
       have h3 := hk ⟨ M.pda.q0,  w,  [M.pda.z0] ⟩
       contrapose! h3
