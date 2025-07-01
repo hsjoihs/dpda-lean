@@ -276,7 +276,99 @@ theorem Hopcroft_to_CPSP_preserves_semantics_single_step {Q S Γ}
               have h_head := congr_fun h2 head
               simp [h5, hq] at h_head
 
+lemma repeat_succ_outer {α} (f : α → α) (n : ℕ) (a : α) :
+  Nat.repeat f (n + 1) a = f (Nat.repeat f n a) := by rfl
+
+lemma repeat_succ_inner {α} (f : α → α) (n : ℕ) (a : α) :
+  Nat.repeat f (n + 1) a = Nat.repeat f n (f a) := by
+   induction n with
+   | zero => rfl
+   | succ d hd =>
+      rw [repeat_succ_outer]
+      nth_rw 2 [repeat_succ_outer]
+      apply congr_arg
+      exact hd
+
+lemma repeat_lift_map α β γ
+  (η_o : α → β)
+  (pick: γ → (α → Option α))
+  (η_f : γ → (β → Option β))
+  (g : γ)
+  (th : ∀ a, ((pick g) a).map η_o = (η_f g) (η_o a))
+  (n : Nat)
+  (a : α) :
+  Nat.repeat (lift (η_f g)) n (some (η_o a)) = (Nat.repeat (lift (pick g)) n (some a)).map η_o := by
+  induction n with
+  | zero => rfl
+  | succ n ih =>
+    simp only [Nat.repeat, lift, ih]
+    cases h : Nat.repeat (lift (pick g)) n (some a) with
+    | none => rfl
+    | some a' =>
+      simp only [Option.map_some]
+      simp only [h, Option.map_some] at ih
+      rw [← th a']
+
+lemma decide_and {a: Bool} {b: Bool} {c: Bool} {d: Bool} (h2: b = d) (h1: a = c) :
+ (a && b) = (c && d) := by
+  simp [h1, h2]
+
 theorem Hopcroft_to_CPSP_preserves_semantics {Q S Γ} [Fintype Q] [DecidableEq Q] [Fintype S /- Σ -/] [Fintype Γ] [DecidableEq Γ]
   (M: Hopcroft_DPDA Q S Γ) (w: List S) (n: ℕ) :
   CPSP_DPDA.membership_provable_in_n_steps (Hopcroft_DPDA.toCPSP M) w (n + 1) =
-  Hopcroft_DPDA.membership_provable_in_n_steps M w n := by sorry
+  Hopcroft_DPDA.membership_provable_in_n_steps M w n := by
+    dsimp only [CPSP_DPDA.membership_provable_in_n_steps, CPSP_DPDA.run_n_steps, Hopcroft_DPDA.membership_provable_in_n_steps, Hopcroft_DPDA.run_n_steps]
+    rw [repeat_succ_inner]
+    let α := (Hopcroft_DPDA_IDesc Q S Γ)
+    let β := CPSP_DPDA_IDesc (AugmentOneState Q) S Γ
+    let γ := Hopcroft_DPDA Q S Γ
+    have h := repeat_lift_map
+      α
+      β
+      γ
+      Hopcroft_DPDA_IDesc.toCPSP
+      Hopcroft_DPDA.stepTransition
+      (fun (M : Hopcroft_DPDA Q S Γ) => CPSP_Judge.stepTransition (Hopcroft_DPDA.toCPSP M).transition)
+      M
+      (Hopcroft_to_CPSP_preserves_semantics_single_step M)
+      n
+
+    simp at h
+    set k := (lift (CPSP_Judge.stepTransition M.toCPSP.transition) (some { p := M.toCPSP.q0, w := w, β := [] })) with hk2
+    by_cases hk: ∃ a, (some (Hopcroft_DPDA_IDesc.toCPSP a) = k)
+    · obtain ⟨ a, hk ⟩ := hk
+      have ha := h a
+      rw [hk] at ha
+      rw [ha]
+      match h2 : Nat.repeat (lift M.stepTransition) n (some a) with
+      | some ⟨p2, w2, β2⟩ =>
+        simp only [Hopcroft_DPDA_IDesc.toCPSP, Hopcroft_DPDA.toCPSP]
+        rw [hk2] at hk
+        simp [lift, Hopcroft_DPDA_IDesc.toCPSP, Hopcroft_DPDA.toCPSP, CPSP_Judge.stepTransition] at hk
+        obtain ⟨ hp, hw, hβ ⟩ := hk
+        rw [← hp, ← hw, ← hβ]
+        have haa : (a = ⟨ a.p, a.w, a.β ⟩ ) := by rfl
+        rw [← haa]
+        rw [h2]
+        simp
+        apply decide_and
+        · unfold Hopcroft_DPDA_IDesc.toCPSP
+          simp
+        · unfold Hopcroft_DPDA_IDesc.toCPSP
+          simp
+      | none =>
+        simp only [Hopcroft_DPDA_IDesc.toCPSP, Hopcroft_DPDA.toCPSP]
+        rw [hk2] at hk
+        simp [lift, Hopcroft_DPDA_IDesc.toCPSP, Hopcroft_DPDA.toCPSP, CPSP_Judge.stepTransition] at hk
+        obtain ⟨ hp, hw, hβ ⟩ := hk
+        rw [← hp, ← hw, ← hβ]
+        have haa : (a = ⟨ a.p, a.w, a.β ⟩ ) := by rfl
+        rw [← haa]
+        rw [h2]
+        simp
+    · rw [hk2] at hk
+      simp only [lift, Hopcroft_DPDA_IDesc.toCPSP, Hopcroft_DPDA.toCPSP, CPSP_Judge.stepTransition] at hk
+      push_neg at hk
+      have h3 := hk ⟨ M.pda.q0,  w,  [M.pda.z0] ⟩
+      contrapose! h3
+      simp

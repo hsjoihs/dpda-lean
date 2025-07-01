@@ -78,9 +78,6 @@ theorem CPSP_to_Hopcroft_preserves_semantics_single_step {Q S Γ}
             simp only [Option.map_some, Option.some.injEq]
             simp only [Hopcroft_DPDA_IDesc.fromCPSP]
 
-lemma repeat_succ {α} (f : α → α) (n : ℕ) (a : α) :
-  Nat.repeat f (n + 1) a = f (Nat.repeat f n a) := by rfl
-
 lemma repeat_lift_map α β γ
   (η_o : α → β)
   (pick: γ → (α → Option α))
