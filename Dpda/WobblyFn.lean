@@ -44,6 +44,19 @@ def WobblyFn.fmap {S: Type u_} {U: Type u_} {V: Type u_} (η: U → V) (wf: Wobb
   | .inl q => WobblyFn.noWant q
   | .inr f => WobblyFn.want f
 
+@[simp] def WobblyFn.to {Q: Type u_} {S: Type u_} (wf: WobblyFn S Q) : Q ⊕ (S → Option Q) :=
+  match wf with
+  | WobblyFn.noWant q => .inl q
+  | WobblyFn.want f => .inr f
+
+@[simp] def WobblyFn.to_opt {Q: Type u_} {S: Type u_} (o_wf: Option (WobblyFn S Q)) : Option Q ⊕ (S → Option Q) :=
+  match o_wf with
+  | none => .inl none
+  | some wf =>
+    match wf with
+    | WobblyFn.noWant q => .inl q
+    | WobblyFn.want f => .inr f
+
 @[simp] def WobblyFn.isWant {U: Type u_} {V: Type u_}
   (wf : WobblyFn U V) : Prop :=
   match wf with

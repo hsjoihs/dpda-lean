@@ -12,3 +12,4 @@ import Dpda.Hopcroft
 import Dpda.Testcases
 import Dpda.HopcroftToCPSP
 import Dpda.CharPopStringPush
+import Dpda.Le1P2ToCPSP
