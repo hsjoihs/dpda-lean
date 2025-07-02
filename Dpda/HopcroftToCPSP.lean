@@ -322,18 +322,12 @@ theorem Hopcroft_to_CPSP_preserves_semantics {Q S Γ} [Fintype Q] [DecidableEq Q
     rw [repeat_succ_inner]
     let α := (Hopcroft_DPDA_IDesc Q S Γ)
     let β := CPSP_DPDA_IDesc (AugmentOneState Q) S Γ
-    let γ := Hopcroft_DPDA Q S Γ
-    have h := repeat_bind_map
-      α
-      β
-      γ
+    have h := repeat_bind_map2 α β
       Hopcroft_DPDA_IDesc.toCPSP
-      Hopcroft_DPDA.stepTransition
-      (fun (M : Hopcroft_DPDA Q S Γ) => CPSP_Judge.stepTransition (Hopcroft_DPDA.toCPSP M).transition)
-      M
+      (Hopcroft_DPDA.stepTransition M)
+      (CPSP_Judge.stepTransition (Hopcroft_DPDA.toCPSP M).transition)
       (Hopcroft_to_CPSP_preserves_semantics_single_step M)
       n
-
     simp only at h
     set k := some { p := M.toCPSP.q0, w := w, β := [] } >>= CPSP_Judge.stepTransition M.toCPSP.transition with hk2
     by_cases hk: ∃ a, (pure (Hopcroft_DPDA_IDesc.toCPSP a) = k)
