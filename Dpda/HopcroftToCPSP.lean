@@ -308,6 +308,11 @@ lemma decide_and {a: Bool} {b: Bool} {c: Bool} {d: Bool} (h2: b = d) (h1: a = c)
  (a && b) = (c && d) := by
   simp only [h1, h2]
 
+
+@[simp] lemma some_bind {α β} (f: α → Option β) (a: α) :
+  (some a >>= f) = f a := by
+  rfl
+
 theorem Hopcroft_to_CPSP_preserves_semantics {Q S Γ} [Fintype Q] [DecidableEq Q] [Fintype S /- Σ -/] [Fintype Γ] [DecidableEq Γ]
   (M: Hopcroft_DPDA Q S Γ) (w: List S) (n: ℕ) :
   CPSP_DPDA.membership_provable_in_n_steps (Hopcroft_DPDA.toCPSP M) w (n + 1) =
@@ -317,7 +322,7 @@ theorem Hopcroft_to_CPSP_preserves_semantics {Q S Γ} [Fintype Q] [DecidableEq Q
     let α := (Hopcroft_DPDA_IDesc Q S Γ)
     let β := CPSP_DPDA_IDesc (AugmentOneState Q) S Γ
     let γ := Hopcroft_DPDA Q S Γ
-    have h := repeat_flipBind_map
+    have h := repeat_bind_map
       α
       β
       γ
@@ -329,19 +334,19 @@ theorem Hopcroft_to_CPSP_preserves_semantics {Q S Γ} [Fintype Q] [DecidableEq Q
       n
 
     simp only at h
-    set k := (flipBind (CPSP_Judge.stepTransition M.toCPSP.transition) (some { p := M.toCPSP.q0, w := w, β := [] })) with hk2
-    by_cases hk: ∃ a, (some (Hopcroft_DPDA_IDesc.toCPSP a) = k)
+    set k := some { p := M.toCPSP.q0, w := w, β := [] } >>= CPSP_Judge.stepTransition M.toCPSP.transition with hk2
+    by_cases hk: ∃ a, (pure (Hopcroft_DPDA_IDesc.toCPSP a) = k)
     · obtain ⟨ a, hk ⟩ := hk
       have ha := h a
       rw [hk] at ha
       rw [ha]
-      match h2 : Nat.repeat (flipBind M.stepTransition) n (some a) with
+      match h2 : Nat.repeat (· >>= M.stepTransition) n (some a) with
       | some ⟨p2, w2, β2⟩ =>
         simp only [Hopcroft_DPDA_IDesc.toCPSP, Hopcroft_DPDA.toCPSP]
         rw [hk2] at hk
-        simp only [Hopcroft_DPDA_IDesc.toCPSP, flipBind, CPSP_Judge.stepTransition,
+        simp only [Hopcroft_DPDA_IDesc.toCPSP, CPSP_Judge.stepTransition,
           Hopcroft_DPDA.toCPSP, Option.some.injEq, CPSP_DPDA_IDesc.mk.injEq,
-          AugmentOneState.fromQ.injEq] at hk
+          AugmentOneState.fromQ.injEq, some_bind, Option.pure_def, Option.some.injEq, imp_self] at hk
         obtain ⟨ hp, hw, hβ ⟩ := hk
         rw [← hp, ← hw, ← hβ]
         have haa : (a = ⟨ a.p, a.w, a.β ⟩ ) := by rfl
@@ -356,17 +361,17 @@ theorem Hopcroft_to_CPSP_preserves_semantics {Q S Γ} [Fintype Q] [DecidableEq Q
       | none =>
         simp only [Hopcroft_DPDA_IDesc.toCPSP, Hopcroft_DPDA.toCPSP]
         rw [hk2] at hk
-        simp only [Hopcroft_DPDA_IDesc.toCPSP, flipBind, CPSP_Judge.stepTransition,
+        simp only [Hopcroft_DPDA_IDesc.toCPSP, CPSP_Judge.stepTransition,
           Hopcroft_DPDA.toCPSP, Option.some.injEq, CPSP_DPDA_IDesc.mk.injEq,
-          AugmentOneState.fromQ.injEq] at hk
+          AugmentOneState.fromQ.injEq, some_bind, Option.pure_def, Option.some.injEq, imp_self] at hk
         obtain ⟨ hp, hw, hβ ⟩ := hk
         rw [← hp, ← hw, ← hβ]
         have haa : (a = ⟨ a.p, a.w, a.β ⟩ ) := by rfl
         rw [← haa]
         rw [h2]
-        simp only [Option.map_none]
+        simp only [Option.map_eq_map, Option.map_none]
     · rw [hk2] at hk
-      simp only [flipBind, Hopcroft_DPDA_IDesc.toCPSP, Hopcroft_DPDA.toCPSP, CPSP_Judge.stepTransition] at hk
+      simp only [Hopcroft_DPDA_IDesc.toCPSP, Hopcroft_DPDA.toCPSP, CPSP_Judge.stepTransition, Option.pure_def, Option.some.injEq, imp_self, some_bind] at hk
       push_neg at hk
       have h3 := hk ⟨ M.pda.q0,  w,  [M.pda.z0] ⟩
       contrapose! h3

@@ -109,10 +109,10 @@ def Hopcroft_DPDA_anbn : Hopcroft_DPDA (Fin 3) Char_ StackSymbol2 where
 def STEP := 4
 def STRING := [Char_.a, Char_.a, Char_.b, Char_.b]
 
-def foo := CPSP_DPDA.run_n_steps CPSP_DPDA_anbn STRING STEP
-#eval match foo with | some ⟨p, _, _⟩ => some p | none => none
-#eval match foo with | some ⟨_, w, _⟩ => some w | none => none
-#eval match foo with | some ⟨_, _, β⟩ => some β | none => none
+def cpsp := CPSP_DPDA.run_n_steps CPSP_DPDA_anbn STRING STEP
+#eval match cpsp with | some ⟨p, _, _⟩ => some p | none => none
+#eval match cpsp with | some ⟨_, w, _⟩ => some w | none => none
+#eval match cpsp with | some ⟨_, _, β⟩ => some β | none => none
 
 def hop := Hopcroft_DPDA.run_n_steps Hopcroft_DPDA_anbn STRING STEP
 #eval match hop with | some ⟨p, _, _⟩ => some p | none => none
