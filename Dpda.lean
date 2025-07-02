@@ -1,6 +1,6 @@
 -- This module serves as the root of the `Dpda` library.
 -- Import modules here that should be built as part of the library.
-import Dpda.Basic
+import Dpda.RepeatBindMap
 import Dpda.AugmentSingleton
 import Dpda.WobblyFn
 import Dpda.PushOrPop1

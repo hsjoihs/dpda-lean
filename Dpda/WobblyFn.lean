@@ -1,4 +1,3 @@
-import Dpda.Basic
 import Dpda.AugmentSingleton
 
 inductive WobblyFn U V
