@@ -256,10 +256,9 @@ theorem Le1P2_to_CPSP_preserves_semantics_single_step {Q S Γ}
 
 theorem Le1P2_to_CPSP_preserves_semantics {Q S Γ} [Fintype Q] [DecidableEq Q] [Fintype S /- Σ -/] [Fintype Γ] [DecidableEq Γ]
   (M: Le1P2_DPDA Q S Γ) (w: List S) (n: ℕ) :
-  CPSP_DPDA.membership_provable_in_n_steps (Le1P2_DPDA.toCPSP M) w (n + 1) =
+  CPSP_DPDA.membership_provable_in_n_steps (Le1P2_DPDA.toCPSP M) w n =
   Le1P2_DPDA.membership_provable_in_n_steps M w n := by
     simp only [CPSP_DPDA.membership_provable_in_n_steps, CPSP_DPDA.run_n_steps, Le1P2_DPDA.membership_provable_in_n_steps, Le1P2_DPDA.run_n_steps]
-    rw [repeat_succ_inner]
     let α := (Le1P2_DPDA_IDesc Q S Γ)
     let β := CPSP_DPDA_IDesc Q S Γ
     have h := repeat_bind_map2 α β
@@ -269,57 +268,17 @@ theorem Le1P2_to_CPSP_preserves_semantics {Q S Γ} [Fintype Q] [DecidableEq Q] [
       (Le1P2_to_CPSP_preserves_semantics_single_step M)
       n
     simp at h
+    have ha := h { p := M.toCPSP.q0, w := w, β := [] }
+    simp [Le1P2_DPDA_IDesc.toCPSP] at ha
     rw [Option.bind_eq_bind]
-    set k := ((some { p := M.toCPSP.q0, w := w, β := [] }).bind (CPSP_Judge.stepTransition M.toCPSP.transition)) with hk
-    by_cases ksome: ∃ a, some (Le1P2_DPDA_IDesc.toCPSP a) = k
-    · obtain ⟨ a, ksome ⟩ := ksome
-      have ha := h a
-      rw [ksome] at ha
-      rw [ha]
+    rw [ha]
+    simp [Le1P2_DPDA.toCPSP]
+    set k := (Nat.repeat (fun x ↦ x.bind (Le1P2_Judge.stepTransition M.transition)) n
+        (some { p := M.q0, w := w, β := [] })) with hk
+    match hk2 : k with
+    | none => simp
+    | some idesc =>
       simp
-      suffices haa : { p := M.q0, w := w, β := [] } = a by
-        rw [haa]
-        set l := Nat.repeat (fun x ↦ x.bind (Le1P2_Judge.stepTransition M.transition)) n (some a) with hl
-        match l with
-        | none => simp
-        | some idesc =>
-          simp
-          apply decide_and
-          · simp [Le1P2_DPDA_IDesc.toCPSP]
-          · simp [Le1P2_DPDA_IDesc.toCPSP, Le1P2_DPDA.toCPSP]
-      /- now we need to show { p := M.q0, w := w, β := [] } = a -/
-      rw [hk] at ksome
-      simp [Le1P2_DPDA_IDesc.toCPSP, Le1P2_DPDA.toCPSP, CPSP_Judge.stepTransition] at ksome
-      match h3 : M.transition M.q0 with
-      | Le1P2_Judge.uncondPop f_Γ_wSq =>
-        simp [h3, trivialEmbedding] at ksome
-        match h4 : f_Γ_wSq AugmentZ0.z0 with
-        | none =>
-          simp [h4, foo] at ksome
-        | some ww =>
-          simp [h4, foo, Option.bind] at ksome
-          match h5 : ww with
-          | WobblyFn.noWant wfεΓ =>
-            simp [h5, WobblyFn.fmap] at ksome
-            sorry
-          | WobblyFn.want fS_wΓ =>
-            simp [h5, WobblyFn.fmap, Le1P2_DPDA_IDesc.toCPSP] at ksome
-            sorry
-      | Le1P2_Judge.observeInput wf_S_wΓ =>
-        simp [h3, transposedEmbedding] at ksome
-        match h4 : wf_S_wΓ with
-        | WobblyFn.noWant (WobblyFn.noWant (γe, q)) =>
-          simp [h4, foo] at ksome
-          sorry
-        | WobblyFn.noWant (WobblyFn.want fS_wΓ) =>
-          simp [h4, foo, Option.bind] at ksome
-          match h6 : fS_wΓ AugmentZ0.z0 with
-          | none =>
-            simp [h6, Option.map_none] at ksome
-          | some kk =>
-            simp [h6, Option.map_some] at ksome
-            sorry
-        | WobblyFn.want fS_wΓ =>
-          simp [h4, foo, Option.bind] at ksome
-          sorry
-    · sorry
+      apply decide_and
+      · rw [Le1P2_DPDA_IDesc.toCPSP]
+      · rw [Le1P2_DPDA_IDesc.toCPSP]
