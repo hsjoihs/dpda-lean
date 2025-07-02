@@ -1,5 +1,6 @@
 import Dpda.CharPopStringPush
 import Dpda.Le1PopLe1Push
+import Dpda.RepeatBindMap
 
 def foo {Q Γ} (G : AugmentZ0 Γ) (wf_Γ : WobblyFn (AugmentZ0 Γ) (AugmentEpsilon Γ × Q)) : Option (List Γ × Q) :=
   match wf_Γ with
@@ -41,6 +42,18 @@ def Le1P2_DPDA.toCPSP {Q S Γ} (M: Le1P2_DPDA Q S Γ) : CPSP_DPDA Q S Γ :=
 def Le1P2_DPDA_IDesc.toCPSP {Q S Γ} (idesc: Le1P2_DPDA_IDesc Q S Γ) : CPSP_DPDA_IDesc Q S Γ :=
   let ⟨ p, w, β ⟩ := idesc
   ⟨ p, w, β ⟩
+
+def Le1P2_DPDA.run_n_steps {Q S Γ} [Fintype Q] [DecidableEq Q] [Fintype S /- Σ -/] [Fintype Γ] [DecidableEq Γ]
+  (M: Le1P2_DPDA Q S Γ) (w: List S) (n: ℕ) : Option (Le1P2_DPDA_IDesc Q S Γ) :=
+  let step : Le1P2_DPDA_IDesc Q S Γ -> Option (Le1P2_DPDA_IDesc Q S Γ) := Le1P2_Judge.stepTransition M.transition
+  Nat.repeat (· >>= step) n (some ⟨M.q0, w, []⟩)
+
+def Le1P2_DPDA.membership_provable_in_n_steps {Q S Γ} [Fintype Q] [DecidableEq Q] [Fintype S /- Σ -/] [Fintype Γ] [DecidableEq Γ]
+  (M: Le1P2_DPDA Q S Γ) (w: List S) (n: ℕ) : Bool :=
+    match Le1P2_DPDA.run_n_steps M w n with
+    | none => false
+    | some idesc => (idesc.p ∈ M.F)  && (idesc.w.length == 0)
+
 
 theorem Le1P2_to_CPSP_preserves_semantics_single_step {Q S Γ}
   [Fintype Q] [DecidableEq Q] [Fintype S /- Σ -/] [Fintype Γ] [DecidableEq Γ]
@@ -238,3 +251,52 @@ theorem Le1P2_to_CPSP_preserves_semantics_single_step {Q S Γ}
                 simp
               | some u =>
                 simp [Le1P2_DPDA_IDesc.toCPSP]
+
+
+@[simp] lemma some_bind {α β} (f: α → Option β) (a: α) :
+  (some a >>= f) = f a := by
+  rfl
+
+theorem Le1P2_to_CPSP_preserves_semantics {Q S Γ} [Fintype Q] [DecidableEq Q] [Fintype S /- Σ -/] [Fintype Γ] [DecidableEq Γ]
+  (M: Le1P2_DPDA Q S Γ) (w: List S) (n: ℕ) :
+  CPSP_DPDA.membership_provable_in_n_steps (Le1P2_DPDA.toCPSP M) w (n + 1) =
+  Le1P2_DPDA.membership_provable_in_n_steps M w n := by
+    dsimp only [CPSP_DPDA.membership_provable_in_n_steps, CPSP_DPDA.run_n_steps, Le1P2_DPDA.membership_provable_in_n_steps, Le1P2_DPDA.run_n_steps]
+    rw [repeat_succ_inner]
+    let α := (Le1P2_DPDA_IDesc Q S Γ)
+    let β := CPSP_DPDA_IDesc Q S Γ
+    have h := repeat_bind_map2 α β
+      Le1P2_DPDA_IDesc.toCPSP
+      (Le1P2_Judge.stepTransition M.transition)
+      (CPSP_Judge.stepTransition M.toCPSP.transition)
+      (Le1P2_to_CPSP_preserves_semantics_single_step M)
+      n
+    simp only at h
+    set k := some { p := M.toCPSP.q0, w := w, β := [] } >>= CPSP_Judge.stepTransition M.toCPSP.transition with hk2
+    by_cases hk: ∃ a, (pure (Le1P2_DPDA_IDesc.toCPSP a) = k)
+    · obtain ⟨ a, hk ⟩ := hk
+      have ha := h a
+      rw [hk] at ha
+      rw [ha]
+      match h2 : Nat.repeat (· >>= Le1P2_Judge.stepTransition M.transition) n (some a) with
+      | some ⟨p2, w2, β2⟩ =>
+        simp only [Le1P2_DPDA_IDesc.toCPSP, Le1P2_DPDA.toCPSP]
+        rw [hk2] at hk
+        simp only [Le1P2_DPDA_IDesc.toCPSP, CPSP_Judge.stepTransition,
+          Le1P2_DPDA.toCPSP, Option.some.injEq, CPSP_DPDA_IDesc.mk.injEq,
+          AugmentOneState.fromQ.injEq, some_bind, Option.pure_def, Option.some.injEq, imp_self] at hk
+        sorry
+      | none =>
+        simp only [Le1P2_DPDA_IDesc.toCPSP, Le1P2_DPDA.toCPSP]
+        rw [hk2] at hk
+        simp only [Le1P2_DPDA_IDesc.toCPSP, CPSP_Judge.stepTransition,
+          Le1P2_DPDA.toCPSP, Option.some.injEq, CPSP_DPDA_IDesc.mk.injEq,
+          AugmentOneState.fromQ.injEq, some_bind, Option.pure_def, Option.some.injEq, imp_self] at hk
+        sorry
+    · rw [hk2] at hk
+      simp only [Le1P2_DPDA_IDesc.toCPSP, Le1P2_DPDA.toCPSP, CPSP_Judge.stepTransition, Option.pure_def, Option.some.injEq, imp_self, some_bind] at hk
+      push_neg at hk
+      have h3 := hk ⟨ M.q0,  w,  [] ⟩
+      contrapose! h3
+      simp only
+      sorry

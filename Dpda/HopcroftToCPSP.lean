@@ -292,19 +292,6 @@ theorem Hopcroft_to_CPSP_preserves_semantics_single_step {Q S Γ}
               have h_head := congr_fun h2 head
               simp only [h5, hq, reduceCtorEq] at h_head
 
-lemma repeat_succ_outer {α} (f : α → α) (n : ℕ) (a : α) :
-  Nat.repeat f (n + 1) a = f (Nat.repeat f n a) := by rfl
-
-lemma repeat_succ_inner {α} (f : α → α) (n : ℕ) (a : α) :
-  Nat.repeat f (n + 1) a = Nat.repeat f n (f a) := by
-   induction n with
-   | zero => rfl
-   | succ d hd =>
-      rw [repeat_succ_outer]
-      nth_rw 2 [repeat_succ_outer]
-      apply congr_arg
-      exact hd
-
 lemma decide_and {a: Bool} {b: Bool} {c: Bool} {d: Bool} (h2: b = d) (h1: a = c) :
  (a && b) = (c && d) := by
   simp only [h1, h2]
