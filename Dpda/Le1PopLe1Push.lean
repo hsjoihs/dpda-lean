@@ -16,7 +16,7 @@ inductive Le1P2_Judge (Q: Type u_) (S: Type u_) (Γ: Type u_)
   | observeInput : WobblyFn S (WobblyFn (AugmentZ0 Γ) (AugmentEpsilon Γ × Q)) → Le1P2_Judge Q S Γ
   | uncondPop : (AugmentZ0 Γ → Option (WobblyFn S (AugmentEpsilon Γ × Q))) → Le1P2_Judge Q S Γ
 
-structure Le1P2_DPDA_IDesc (Q: Type u_) (S: Type u_) (Γ: Type u_) where
+@[ext] structure Le1P2_DPDA_IDesc (Q: Type u_) (S: Type u_) (Γ: Type u_) where
   p : Q
   w : List S
   β : List Γ
@@ -24,7 +24,7 @@ structure Le1P2_DPDA_IDesc (Q: Type u_) (S: Type u_) (Γ: Type u_) where
 abbrev Le1P2_Transition (Q: Type u_) (S: Type u_) (Γ: Type u_) :=
   Q → Le1P2_Judge Q S Γ
 
-structure Le1P2_DPDA (Q: Type u_) (S: Type u_) (Γ: Type u_) where
+@[ext] structure Le1P2_DPDA (Q: Type u_) (S: Type u_) (Γ: Type u_) where
   q0 : Q
   F : Finset Q
   transition : Le1P2_Transition Q S Γ
