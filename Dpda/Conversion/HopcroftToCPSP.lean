@@ -5,7 +5,7 @@ import Dpda.RepeatBindMap
 /--
  - Hopcroft --> CPSP
  -/
-def Hopcroft_DPDA_IDesc.toCPSP {Q S Γ} [Fintype Q] [DecidableEq Q] [Fintype S /- Σ -/] [Fintype Γ] [DecidableEq Γ]
+def Hopcroft_DPDA_IDesc.toCPSP {Q S Γ} [Fintype Q] [DecidableEq Q] [Fintype S] [Fintype Γ] [DecidableEq Γ]
   (pwβ: Hopcroft_DPDA_IDesc Q S Γ) : CPSP_DPDA_IDesc (AugmentOneState Q) S Γ :=
   ⟨AugmentOneState.fromQ pwβ.p, pwβ.w, pwβ.β⟩
 
@@ -33,7 +33,7 @@ def Hopcroft_DPDA.toCPSP {Q S Γ} [DecidableEq Q] [DecidableEq Γ] (M: Hopcroft_
   ⟨q_neg1, F, new_transition⟩
 
 theorem Hopcroft_to_CPSP_preserves_semantics_if_transition_is_immediate {Q S Γ}
-  [Fintype Q] [DecidableEq Q] [Fintype S /- Σ -/] [Fintype Γ] [DecidableEq Γ]
+  [Fintype Q] [DecidableEq Q] [Fintype S] [Fintype Γ] [DecidableEq Γ]
   (M: Hopcroft_DPDA Q S Γ) (idesc: Hopcroft_DPDA_IDesc Q S Γ)
   (stack_nonempty_and_transition_immediate: ∃ A γ, idesc.β = A :: γ ∧ ∃ a, M.Δ (idesc.p, A) = CPSP_Judge.immediate a) :
   let M_cpsp : CPSP_DPDA (AugmentOneState Q) S Γ := Hopcroft_DPDA.toCPSP M
@@ -196,7 +196,7 @@ lemma pair_eq {A} {B} {a: A} {b : B} {val} (h:  (a, b) = val) : b = val.2 ∧ a 
   exact ⟨ h.2, h.1 ⟩
 
 theorem Hopcroft_to_CPSP_preserves_semantics_single_step {Q S Γ}
-  [Fintype Q] [DecidableEq Q] [Fintype S /- Σ -/] [Fintype Γ] [DecidableEq Γ]
+  [Fintype Q] [DecidableEq Q] [Fintype S] [Fintype Γ] [DecidableEq Γ]
   (M: Hopcroft_DPDA Q S Γ) (idesc: Hopcroft_DPDA_IDesc Q S Γ) :
   let M_cpsp : CPSP_DPDA (AugmentOneState Q) S Γ := Hopcroft_DPDA.toCPSP M
   let idesc_cpsp := Hopcroft_DPDA_IDesc.toCPSP idesc
@@ -310,7 +310,7 @@ lemma decide_and {a: Bool} {b: Bool} {c: Bool} {d: Bool} (h2: b = d) (h1: a = c)
   (some a >>= f) = f a := by
   rfl
 
-theorem Hopcroft_to_CPSP_preserves_semantics {Q S Γ} [Fintype Q] [DecidableEq Q] [Fintype S /- Σ -/] [Fintype Γ] [DecidableEq Γ]
+theorem Hopcroft_to_CPSP_preserves_semantics {Q S Γ} [Fintype Q] [DecidableEq Q] [Fintype S] [Fintype Γ] [DecidableEq Γ]
   (M: Hopcroft_DPDA Q S Γ) (w: List S) (n: ℕ) :
   CPSP_DPDA.membership_provable_in_n_steps (Hopcroft_DPDA.toCPSP M) w (n + 1) =
   Hopcroft_DPDA.membership_provable_in_n_steps M w n := by

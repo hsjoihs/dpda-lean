@@ -6,7 +6,7 @@ import Dpda.RepeatBindMap
  - CPSP --> Hopcroft
  -/
 
-def Hopcroft_DPDA_IDesc.fromCPSP {Q S Γ} [Fintype Q] [DecidableEq Q] [Fintype S /- Σ -/] [Fintype Γ] [DecidableEq Γ]
+def Hopcroft_DPDA_IDesc.fromCPSP {Q S Γ} [Fintype Q] [DecidableEq Q] [Fintype S] [Fintype Γ] [DecidableEq Γ]
   (pwβ: CPSP_DPDA_IDesc Q S Γ) : Hopcroft_DPDA_IDesc Q S (AugmentZ0 Γ) :=
   ⟨pwβ.p, pwβ.w, pwβ.β.map AugmentZ0.fromΓ ++ [AugmentZ0.z0]⟩
 
@@ -45,7 +45,7 @@ def Hopcroft_DPDA.fromCPSP {Q S Γ} (M_tilde: CPSP_DPDA Q S Γ): Hopcroft_DPDA Q
   ⟨pda, deterministic⟩
 
 theorem CPSP_to_Hopcroft_preserves_semantics_single_step {Q S Γ}
-  [Fintype Q] [DecidableEq Q] [Fintype S /- Σ -/] [Fintype Γ] [DecidableEq Γ]
+  [Fintype Q] [DecidableEq Q] [Fintype S] [Fintype Γ] [DecidableEq Γ]
   (M: CPSP_DPDA Q S Γ) (idesc: CPSP_DPDA_IDesc Q S Γ) :
   let M_hop := Hopcroft_DPDA.fromCPSP M
   let idesc_hop := Hopcroft_DPDA_IDesc.fromCPSP idesc
@@ -113,7 +113,7 @@ theorem CPSP_to_Hopcroft_preserves_semantics_single_step {Q S Γ}
             simp only [Option.map_some, Option.some.injEq]
             simp only [Hopcroft_DPDA_IDesc.fromCPSP]
 
-theorem CPSP_to_Hopcroft_preserves_semantics {Q S Γ} [Fintype Q] [DecidableEq Q] [Fintype S /- Σ -/] [Fintype Γ] [DecidableEq Γ]
+theorem CPSP_to_Hopcroft_preserves_semantics {Q S Γ} [Fintype Q] [DecidableEq Q] [Fintype S] [Fintype Γ] [DecidableEq Γ]
   (M: CPSP_DPDA Q S Γ) (w: List S) (n: ℕ) :
   Hopcroft_DPDA.membership_provable_in_n_steps (Hopcroft_DPDA.fromCPSP M) w n =
   CPSP_DPDA.membership_provable_in_n_steps M w n := by

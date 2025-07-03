@@ -44,12 +44,12 @@ def Le1P2_DPDA_IDesc.toCPSP {Q S Γ} (idesc: Le1P2_DPDA_IDesc Q S Γ) : CPSP_DPD
   let ⟨ p, w, β ⟩ := idesc
   ⟨ p, w, β ⟩
 
-def Le1P2_DPDA.run_n_steps {Q S Γ} [Fintype Q] [DecidableEq Q] [Fintype S /- Σ -/] [Fintype Γ] [DecidableEq Γ]
+def Le1P2_DPDA.run_n_steps {Q S Γ} [Fintype Q] [DecidableEq Q] [Fintype S] [Fintype Γ] [DecidableEq Γ]
   (M: Le1P2_DPDA Q S Γ) (w: List S) (n: ℕ) : Option (Le1P2_DPDA_IDesc Q S Γ) :=
   let step : Le1P2_DPDA_IDesc Q S Γ -> Option (Le1P2_DPDA_IDesc Q S Γ) := Le1P2_Judge.stepTransition M.transition
   Nat.repeat (· >>= step) n (some ⟨M.q0, w, []⟩)
 
-def Le1P2_DPDA.membership_provable_in_n_steps {Q S Γ} [Fintype Q] [DecidableEq Q] [Fintype S /- Σ -/] [Fintype Γ] [DecidableEq Γ]
+def Le1P2_DPDA.membership_provable_in_n_steps {Q S Γ} [Fintype Q] [DecidableEq Q] [Fintype S] [Fintype Γ] [DecidableEq Γ]
   (M: Le1P2_DPDA Q S Γ) (w: List S) (n: ℕ) : Bool :=
     match Le1P2_DPDA.run_n_steps M w n with
     | none => false
@@ -57,7 +57,7 @@ def Le1P2_DPDA.membership_provable_in_n_steps {Q S Γ} [Fintype Q] [DecidableEq 
 
 
 theorem Le1P2_to_CPSP_preserves_semantics_single_step {Q S Γ}
-  [Fintype Q] [DecidableEq Q] [Fintype S /- Σ -/] [Fintype Γ] [DecidableEq Γ]
+  [Fintype Q] [DecidableEq Q] [Fintype S] [Fintype Γ] [DecidableEq Γ]
   (M: Le1P2_DPDA Q S Γ) (idesc: Le1P2_DPDA_IDesc Q S Γ) :
   let M_cpsp : CPSP_DPDA Q S Γ := Le1P2_DPDA.toCPSP M
   let idesc_cpsp := Le1P2_DPDA_IDesc.toCPSP idesc
@@ -254,7 +254,7 @@ theorem Le1P2_to_CPSP_preserves_semantics_single_step {Q S Γ}
                 simp [Le1P2_DPDA_IDesc.toCPSP]
 
 
-theorem Le1P2_to_CPSP_preserves_semantics {Q S Γ} [Fintype Q] [DecidableEq Q] [Fintype S /- Σ -/] [Fintype Γ] [DecidableEq Γ]
+theorem Le1P2_to_CPSP_preserves_semantics {Q S Γ} [Fintype Q] [DecidableEq Q] [Fintype S] [Fintype Γ] [DecidableEq Γ]
   (M: Le1P2_DPDA Q S Γ) (w: List S) (n: ℕ) :
   CPSP_DPDA.membership_provable_in_n_steps (Le1P2_DPDA.toCPSP M) w n =
   Le1P2_DPDA.membership_provable_in_n_steps M w n := by
