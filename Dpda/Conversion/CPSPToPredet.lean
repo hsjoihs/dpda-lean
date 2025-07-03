@@ -7,29 +7,6 @@ import Mathlib.Data.Finset.Max
   First of all, this increases the number of overall states (that is, |Q|).
 -/
 
-def extract_string_length {Q Γ} (o : Option (List Γ × Q)) : Nat :=
-  match o with
-  | none => 0
-  | some (s, _) => s.length
-
-def CPSP_Judge.max_string_length {Q S Γ} [Fintype Q] [Fintype S] [Fintype Γ]
-  (v: CPSP_Judge Q S Γ) : Nat :=
-  match v with
-  | CPSP_Judge.immediate none => 0
-  | CPSP_Judge.immediate (some (α, _)) => α.length
-  | CPSP_Judge.step f =>
-    let candidates := Finset.image (extract_string_length ∘ f) Finset.univ
-    match Finset.max candidates with
-    | some maximum => maximum
-    | none => 0
-
-def CPSP_DPDA.max_string_length {Q S Γ} [Fintype Q] [Fintype S] [Fintype Γ]
-  (M: CPSP_DPDA Q S Γ) : Nat :=
-  let candidates : Finset Nat := Finset.image (CPSP_Judge.max_string_length ∘ M.transition) Finset.univ
-  match Finset.max candidates with
-  | some maximum => maximum
-  | none => 0
-
 def CPSP_DPDA.str {Q S Γ} [Fintype Q] [Fintype S] [Fintype Γ] [DecidableEq Q] (M: CPSP_DPDA Q S Γ)
   (qa : Q) (qb : Q) (G : AugmentZ0 Γ) (Sε : AugmentEpsilon S) : Option (List Γ) :=
   match Sε with
@@ -180,3 +157,26 @@ def CPSP_DPDA.send_idesc_toPredet {Q S Γ}
   let w := idesc.w
   let β := idesc.β
   ⟨ QExpand.originalQ p, w, β ⟩
+
+theorem CPSP_single_step_corresponds_to_Predet_sequence {Q S Γ}
+  [Fintype Q] [DecidableEq Q] [Fintype S] [Fintype Γ] [DecidableEq Γ] [DecidableEq S]
+  (M: CPSP_DPDA Q S Γ) (idesc: CPSP_DPDA_IDesc Q S Γ) :
+  let M_predet := M.toPredet
+  let idesc_predet := M.send_idesc_toPredet idesc
+  let after_step : Option (CPSP_DPDA_IDesc Q S Γ) := CPSP_Judge.stepTransition M.transition idesc
+  let consumed_input_char : Option (AugmentEpsilon S) := CPSP_Judge.stepTransition_consumedInputChar M.transition idesc
+  let popped_stack_char : AugmentZ0 Γ := match idesc.β with
+    | [] => AugmentZ0.z0
+    | A :: γ => AugmentZ0.fromΓ A
+  let len : Nat := (
+    match after_step, consumed_input_char with
+    | some new_idesc, some input_char =>
+      match M.str idesc.p new_idesc.p popped_stack_char input_char with
+      | none => 0
+      | some str => str.length
+    | _, _ => 0
+  )
+  let after_lenplus1_steps_predet : Option (Predet_DPDA_IDesc (M.expandedQ) S Γ) :=
+    Nat.repeat (· >>= Predet_DPDA.stepTransition M_predet) (len + 1) idesc_predet
+  after_step.map M.send_idesc_toPredet = after_lenplus1_steps_predet := by
+  sorry

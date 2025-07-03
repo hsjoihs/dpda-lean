@@ -1,6 +1,4 @@
 import Dpda.WobblyFn
-import Dpda.Definition.PushOrPop1
-import Dpda.Definition.PushOrPop2
 
 universe u_
 
@@ -51,3 +49,9 @@ def Predet_Transition.stepTransition {Q: Type u_} {S: Type u_} {Γ: Type u_}
           | none => none
           | some q => some (q, t)
       some ⟨q, x, γ⟩
+
+def Predet_DPDA.stepTransition {Q: Type u_} {S: Type u_} {Γ: Type u_}
+  (M: Predet_DPDA Q S Γ)
+  (pwβ: Predet_DPDA_IDesc Q S Γ)
+  : Option (Predet_DPDA_IDesc Q S Γ) :=
+  Predet_Transition.stepTransition M.transition pwβ

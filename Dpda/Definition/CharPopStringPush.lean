@@ -58,6 +58,29 @@ def CPSP_Judge.stepTransition {Q S Γ}
         | none => none
         | some (α, q) => some ⟨q, x, α ++ γ⟩
 
+
+def CPSP_Judge.stepTransition_consumedInputChar {Q S Γ}
+  (tilde_delta: CPSP_Transition Q S Γ)
+  (pwβ: CPSP_DPDA_IDesc Q S Γ)
+  : Option (AugmentEpsilon S) :=
+  match pwβ.β with
+  | .nil => match tilde_delta (pwβ.p, .z0) with
+    | CPSP_Judge.immediate none => none
+    | CPSP_Judge.immediate (some _) => some (AugmentEpsilon.Epsilon)
+    | CPSP_Judge.step f => match pwβ.w with
+      | .nil => none
+      | a :: _ => match f a with
+        | none => none
+        | some _ => some (AugmentEpsilon.fromChar a)
+  | A :: _ => match tilde_delta (pwβ.p, .fromΓ A) with
+    | CPSP_Judge.immediate none => none
+    | CPSP_Judge.immediate (some _) => some (AugmentEpsilon.Epsilon)
+    | CPSP_Judge.step f => match pwβ.w with
+      | .nil => none
+      | a :: _ => match f a with
+        | none => none
+        | some _ => some (AugmentEpsilon.fromChar a)
+
 structure CPSP_DPDA (Q S Γ) where
   q0 : Q
   F : Finset Q
