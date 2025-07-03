@@ -7,7 +7,7 @@
    viewBox="-120 0 719.85388 273.68802"
    version="1.1"
    id="svg1"
-   inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
+   inkscape:version="1.2.2 (732a01da63, 2022-12-09)"
    sodipodi:docname="overview.svg"
    inkscape:export-filename="overview.png"
    inkscape:export-xdpi="96"
@@ -27,14 +27,15 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
      inkscape:zoom="0.48693448"
-     inkscape:cx="1088.4421"
+     inkscape:cx="1043.2615"
      inkscape:cy="662.30676"
      inkscape:window-width="1920"
-     inkscape:window-height="991"
+     inkscape:window-height="1001"
      inkscape:window-x="-9"
      inkscape:window-y="-9"
      inkscape:window-maximized="1"
-     inkscape:current-layer="layer1" />
+     inkscape:current-layer="layer1"
+     showgrid="false" />
   <defs
      id="defs1">
     <marker
@@ -67,7 +68,7 @@
        id="rect15"
        width="719.85388"
        height="273.68802"
-       x="-119.99999"
+       x="-120.54336"
        y="0" />
     <text
        xml:space="preserve"
@@ -173,28 +174,32 @@
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10.5833px;font-family:Consolas;-inkscape-font-specification:Consolas;fill:#0098ff;fill-opacity:1;stroke-width:0.264583"
          x="-108.69432"
          y="24.610563">.embedInPP2</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-size:35.2778px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#0098ff;fill-opacity:1;stroke-width:0.264583"
-       x="-55.874863"
-       y="93.001244"
-       id="text10"><tspan
-         sodipodi:role="line"
-         id="tspan10"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:35.2778px;font-family:'メイリオ';-inkscape-font-specification:'メイリオ';fill:#0098ff;fill-opacity:1;stroke-width:0.264583"
+    <g
+       id="g466"
+       transform="translate(0,-5.9262512)">
+      <text
+         xml:space="preserve"
+         style="font-size:35.2778px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#0098ff;fill-opacity:1;stroke-width:0.264583"
          x="-55.874863"
-         y="93.001244">↺</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-size:10.5833px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#0098ff;fill-opacity:1;stroke-width:0.264583"
-       x="-86.996468"
-       y="68.411339"
-       id="text11"><tspan
-         sodipodi:role="line"
-         id="tspan11"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10.5833px;font-family:Consolas;-inkscape-font-specification:Consolas;fill:#0098ff;fill-opacity:1;stroke-width:0.264583"
+         y="93.001244"
+         id="text10"><tspan
+           sodipodi:role="line"
+           id="tspan10"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:35.2778px;font-family:'メイリオ';-inkscape-font-specification:'メイリオ';fill:#0098ff;fill-opacity:1;stroke-width:0.264583"
+           x="-55.874863"
+           y="93.001244">↺</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-size:10.5833px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#0098ff;fill-opacity:1;stroke-width:0.264583"
          x="-86.996468"
-         y="68.411339">.embed_commutes</tspan></text>
+         y="68.411339"
+         id="text11"><tspan
+           sodipodi:role="line"
+           id="tspan11"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10.5833px;font-family:Consolas;-inkscape-font-specification:Consolas;fill:#0098ff;fill-opacity:1;stroke-width:0.264583"
+           x="-86.996468"
+           y="68.411339">.embed_commutes</tspan></text>
+    </g>
     <path
        style="fill:none;stroke:#0098ff;stroke-width:2.16029;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#ArrowWide)"
        d="m 42.600483,136.844 v 27.34453"
@@ -281,5 +286,53 @@
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:17.6389px;font-family:Consolas;-inkscape-font-specification:Consolas;fill:#ff0000;fill-opacity:1;stroke-width:0.264583"
          x="307.60541"
          y="73.78231">sorry</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:14.1111px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#bb17e1;fill-opacity:1;stroke-width:0.264583"
+       x="-0.41838944"
+       y="257.78165"
+       id="text288"><tspan
+         sodipodi:role="line"
+         id="tspan286"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.1111px;font-family:Consolas;-inkscape-font-specification:Consolas;fill:#bb17e1;fill-opacity:1;stroke-width:0.264583"
+         x="-0.41838944"
+         y="257.78165">Sipser_DPDA</tspan></text>
+    <g
+       id="g344"
+       transform="translate(-238.98521)"
+       style="stroke:#ff0000">
+      <path
+         style="fill:none;stroke:#ff0000;stroke-width:2.16029;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#ArrowWide)"
+         d="m 276.02944,191.7865 v 48.51119"
+         id="path338"
+         sodipodi:nodetypes="cc" />
+      <path
+         style="fill:none;stroke:#ff0000;stroke-width:2.16029;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#ArrowWide)"
+         d="m 287.14195,242.36532 v -48.5112"
+         id="path340"
+         sodipodi:nodetypes="cc" />
+    </g>
+    <text
+       xml:space="preserve"
+       style="font-size:17.6389px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#ff0000;fill-opacity:1;stroke-width:0.264583"
+       x="-19.901922"
+       y="219.68556"
+       id="text400"><tspan
+         sodipodi:role="line"
+         id="tspan398"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:17.6389px;font-family:Consolas;-inkscape-font-specification:Consolas;fill:#ff0000;fill-opacity:1;stroke-width:0.264583"
+         x="-19.901922"
+         y="219.68556">sorry</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:17.6389px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#ff0000;fill-opacity:1;stroke-width:0.264583"
+       x="54.984173"
+       y="219.68556"
+       id="text404"><tspan
+         sodipodi:role="line"
+         id="tspan402"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:17.6389px;font-family:Consolas;-inkscape-font-specification:Consolas;fill:#ff0000;fill-opacity:1;stroke-width:0.264583"
+         x="54.984173"
+         y="219.68556">sorry</tspan></text>
   </g>
 </svg>
