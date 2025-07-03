@@ -12,39 +12,39 @@ def embedPADWTC {Q: Type u_} {S: Type u_} {Γ: Type u_}
   | none => none
   | some u => WobblyFn.from u
 
-def PTPP_DPDA.embedInPP2 {Q: Type u_} {S: Type u_} {Γ: Type u_} (M: PTPP_DPDA Q S Γ)
+def Predet_DPDA.embedInPP2 {Q: Type u_} {S: Type u_} {Γ: Type u_} (M: Predet_DPDA Q S Γ)
   : PP2_DPDA Q S Γ :=
   { q0 := M.q0
   , F := M.F
   , transition := fun q =>
       match M.transition q with
-      | PTPP_Judge.popAndDecideWhetherToConsume f =>
+      | Predet_Judge.popAndDecideWhetherToConsume f =>
         PP2_Judge.uncondPop fun Γz =>
           (embedPADWTC f Γz : Option (WobblyFn S Q)).map
           (WobblyFn.fmap fun q => ((), q))
-      | PTPP_Judge.uncondPush γq =>
+      | Predet_Judge.uncondPush γq =>
         PP2_Judge.observeInput (WobblyFn.noWant (.inl γq))
   }
 
-def PTPP_DPDA.embedInPP1 {Q: Type u_} {S: Type u_} {Γ: Type u_} (M: PTPP_DPDA Q S Γ)
+def Predet_DPDA.embedInPP1 {Q: Type u_} {S: Type u_} {Γ: Type u_} (M: Predet_DPDA Q S Γ)
   : PP1_DPDA Q S Γ :=
   { q0 := M.q0
   , F := M.F
   , transition := fun q =>
       match M.transition q with
-      | PTPP_Judge.popAndDecideWhetherToConsume f =>
+      | Predet_Judge.popAndDecideWhetherToConsume f =>
         PP1_Judge.popAndDecideWhetherToConsume f
-      | PTPP_Judge.uncondPush γq =>
+      | Predet_Judge.uncondPush γq =>
         PP1_Judge.unconditionalPush γq
   }
 
-def PTPP_DPDA.embed_commutes {Q: Type u_} {S: Type u_} {Γ: Type u_}
-  : ∀ (M: PTPP_DPDA Q S Γ),
+def Predet_DPDA.embed_commutes {Q: Type u_} {S: Type u_} {Γ: Type u_}
+  : ∀ (M: Predet_DPDA Q S Γ),
     M.embedInPP1.embedInPP2 = M.embedInPP2 := by
     intro M
     obtain ⟨ q0, F, transition ⟩ := M
-    unfold PTPP_DPDA.embedInPP1
-    unfold PTPP_DPDA.embedInPP2
+    unfold Predet_DPDA.embedInPP1
+    unfold Predet_DPDA.embedInPP2
     unfold PP1_DPDA.embedInPP2
     simp only [PP2_DPDA.mk.injEq, true_and]
     ext q
@@ -52,7 +52,7 @@ def PTPP_DPDA.embed_commutes {Q: Type u_} {S: Type u_} {Γ: Type u_}
     | uncondPush f =>
       rfl
     | popAndDecideWhetherToConsume a2 =>
-      cases PTPP_Judge.popAndDecideWhetherToConsume a2 with
+      cases Predet_Judge.popAndDecideWhetherToConsume a2 with
       | uncondPush g => rfl
       | popAndDecideWhetherToConsume g =>
         simp only [PP2_Judge.uncondPop.injEq]

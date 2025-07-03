@@ -73,14 +73,14 @@
     <text
        xml:space="preserve"
        style="font-size:14.1111px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#bb17e1;fill-opacity:1;stroke-width:0.264583"
-       x="7.17804"
+       x="-0.58030796"
        y="14.64014"
        id="text1"><tspan
          sodipodi:role="line"
          id="tspan1"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.1111px;font-family:Consolas;-inkscape-font-specification:Consolas;fill:#bb17e1;fill-opacity:1;stroke-width:0.264583"
-         x="7.17804"
-         y="14.64014">PTPP_DPDA</tspan></text>
+         x="-0.58030796"
+         y="14.64014">Predet_DPDA</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:14.1111px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#bb17e1;fill-opacity:1;stroke-width:0.264583"
@@ -160,20 +160,20 @@
          y="97.611855">.embedInPP2</tspan></text>
     <path
        style="fill:none;stroke:#0098ff;stroke-width:2.16;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#ArrowWide)"
-       d="m 0.55533089,14.894619 c -157.16486089,38.955723 -145.14768089,81.741682 0,107.280161"
+       d="M -7.0517843,11.184711 C -164.21665,50.140434 -140.24543,97.723032 4.9022538,123.26151"
        id="path8"
        sodipodi:nodetypes="cc" />
     <text
        xml:space="preserve"
        style="font-size:10.5833px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#0098ff;fill-opacity:1;stroke-width:0.264583"
-       x="-108.69432"
-       y="24.610563"
+       x="-108.15096"
+       y="18.090179"
        id="text9"><tspan
          sodipodi:role="line"
          id="tspan9"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10.5833px;font-family:Consolas;-inkscape-font-specification:Consolas;fill:#0098ff;fill-opacity:1;stroke-width:0.264583"
-         x="-108.69432"
-         y="24.610563">.embedInPP2</tspan></text>
+         x="-108.15096"
+         y="18.090179">.embedInPP2</tspan></text>
     <g
        id="g466"
        transform="translate(0,-5.9262512)">
