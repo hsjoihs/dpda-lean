@@ -33,43 +33,30 @@ def Predet_Transition.stepTransition {Q: Type u_} {S: Type u_} {Γ: Type u_}
       match transition pwβ.p with
       | Predet_Judge.uncondPush (γ, q) => some ⟨q, pwβ.w, γ :: pwβ.β⟩
       | Predet_Judge.popAndDecideWhetherToConsume f =>
-        let inner : Q ⊕ (S → Option Q) → WobblyFn S (AugmentEpsilon Γ × Q) := (
-              fun k => match k with
-              | Sum.inl q => WobblyFn.noWant (AugmentEpsilon.Epsilon, q)
-              | Sum.inr f2 =>
-                WobblyFn.want fun s =>
-                  match f2 s with
-                  | none => none
-                  | some q => some  (AugmentEpsilon.Epsilon, q)
-            )
         match pwβ.β with
           | [] =>
             do
-              let k ← f AugmentZ0.z0
-              let ⟨ ⟨ α, q ⟩, x⟩ ← (
-                  match inner k with
-                  | WobblyFn.noWant v => some (v, pwβ.w)
-                  | WobblyFn.want f => match pwβ.w with
+              let k : Q ⊕ (S → Option Q) ← f AugmentZ0.z0
+              let ⟨ ⟨ α, q ⟩, x⟩ ←
+                  match k with
+                  | Sum.inl q => some ((AugmentEpsilon.Epsilon, q), pwβ.w)
+                  | Sum.inr f2 => match pwβ.w with
                     | [] => none
-                    | A :: t =>
-                      match f A with
-                      | none => none
-                      | some v => some (v, t)
-                    )
+                    | a :: t => match f2 a with
+                        | none => none
+                        | some q => some ((AugmentEpsilon.Epsilon, q), t)
               some ⟨q, x, α.toList⟩
           | A :: γ =>
             do
               let k ← f (AugmentZ0.fromΓ A)
-              let ⟨ ⟨ α, q ⟩, x⟩ ← (
-                match inner k with
-                | WobblyFn.noWant v => some (v, pwβ.w)
-                | WobblyFn.want f => match pwβ.w with
-                  | [] => none
-                  | A :: t =>
-                    match f A with
-                    | none => none
-                    | some v => some (v, t)
-                  )
+              let ⟨ ⟨ α, q ⟩, x⟩ ←
+                  match k with
+                  | Sum.inl q => some ((AugmentEpsilon.Epsilon, q), pwβ.w)
+                  | Sum.inr f2 => match pwβ.w with
+                    | [] => none
+                    | a :: t => match f2 a with
+                        | none => none
+                        | some q => some ((AugmentEpsilon.Epsilon, q), t)
               some ⟨q, x, α.toList ++ γ⟩
     )
   fo.map fun idesc =>
