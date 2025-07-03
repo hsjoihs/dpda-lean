@@ -1,7 +1,7 @@
-import Dpda.CharPopStringPush
-import Dpda.Le1PopLe1Push
+import Dpda.Definition.CharPopStringPush
+import Dpda.Definition.Le1PopLe1Push
+import Dpda.Conversion.HopcroftToCPSP
 import Dpda.RepeatBindMap
-import Dpda.HopcroftToCPSP
 
 def foo {Q Γ} (G : AugmentZ0 Γ) (wf_Γ : WobblyFn (AugmentZ0 Γ) (AugmentEpsilon Γ × Q)) : Option (List Γ × Q) :=
   match wf_Γ with

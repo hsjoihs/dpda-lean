@@ -1,7 +1,6 @@
 import Mathlib.Data.Finset.Basic
 import Mathlib.Data.Fintype.Basic
 import Mathlib.Data.Fintype.Prod
-import Dpda.CharPopStringPush
 import Dpda.AugmentSingleton
 
 -- Hopcroft's DPDA definition [Introduction to Automata Theory, Languages, and Computation 3rd edition (page 252)]

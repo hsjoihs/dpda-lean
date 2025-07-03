@@ -1,5 +1,5 @@
-import Dpda.CharPopStringPush
-import Dpda.Hopcroft
+import Dpda.Definition.CharPopStringPush
+import Dpda.Definition.Hopcroft
 import Dpda.RepeatBindMap
 
 /--
@@ -8,6 +8,15 @@ import Dpda.RepeatBindMap
 def Hopcroft_DPDA_IDesc.toCPSP {Q S Γ} [Fintype Q] [DecidableEq Q] [Fintype S /- Σ -/] [Fintype Γ] [DecidableEq Γ]
   (pwβ: Hopcroft_DPDA_IDesc Q S Γ) : CPSP_DPDA_IDesc (AugmentOneState Q) S Γ :=
   ⟨AugmentOneState.fromQ pwβ.p, pwβ.w, pwβ.β⟩
+
+def Hopcroft_DPDA.Δ {Q S Γ} (M: Hopcroft_DPDA Q S Γ) : Q × Γ → CPSP_Judge (AugmentOneState Q) S Γ :=
+  fun (q, X) =>
+    match M.pda.transition (q, none, X) with
+    | some (p, α) => CPSP_Judge.immediate (some (α, AugmentOneState.fromQ p))
+    | none => CPSP_Judge.step fun a =>
+      match M.pda.transition (q, some a, X) with
+      | some (p, α) => some (α, AugmentOneState.fromQ p)
+      | none => none
 
 def Hopcroft_DPDA.toCPSP {Q S Γ} [DecidableEq Q] [DecidableEq Γ] (M: Hopcroft_DPDA Q S Γ) : CPSP_DPDA (AugmentOneState Q) S Γ :=
   let q_neg1 : AugmentOneState Q := AugmentOneState.qNeg1

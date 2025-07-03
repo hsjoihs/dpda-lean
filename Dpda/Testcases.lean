@@ -1,5 +1,5 @@
-import Dpda.CharPopStringPush
-import Dpda.Hopcroft
+import Dpda.Definition.CharPopStringPush
+import Dpda.Definition.Hopcroft
 
 import Mathlib.Data.Finset.Basic
 import Mathlib.Data.Finset.Insert

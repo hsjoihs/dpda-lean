@@ -1,5 +1,5 @@
 import Dpda.WobblyFn
-import Dpda.Le1PopLe1Push
+import Dpda.Definition.Le1PopLe1Push
 
 universe u_
 

@@ -1,6 +1,6 @@
 import Dpda.WobblyFn
-import Dpda.PushOrPop1
-import Dpda.PushOrPop2
+import Dpda.Definition.PushOrPop1
+import Dpda.Definition.PushOrPop2
 
 universe u_
 
