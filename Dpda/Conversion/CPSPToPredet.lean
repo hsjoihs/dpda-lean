@@ -64,28 +64,49 @@ instance {Q S Γ} [Fintype Q] [Fintype S] [Fintype Γ] [DecidableEq Q]
     elems := sorry
     complete := sorry
 
+theorem five_tuple {A B C D E} (t1 : A × B × C × D × E) (t2 : A × B × C × D × E) :
+  t1 = t2 ↔
+  t1.1 = t2.1 ∧
+  t1.2.1 = t2.2.1 ∧
+  t1.2.2.1 = t2.2.2.1 ∧
+  t1.2.2.2.1 = t2.2.2.2.1 ∧
+  t1.2.2.2.2 = t2.2.2.2.2 := by
+  cases t1; cases t2; simp [Prod.ext_iff]
+
 def myDecEq {Q S Γ} [Fintype Q] [Fintype S] [Fintype Γ] [DecidableEq Q] [DecidableEq Γ] [DecidableEq S]
   (M: CPSP_DPDA Q S Γ) (a b : CPSP_DPDA.expandedQ M) : Decidable (a = b) :=
   match a, b with
   | QExpand.originalQ qa, QExpand.originalQ qb =>
-    if qa = qb then isTrue sorry
-    else isFalse (fun h => by cases h; sorry)
+    if h : qa = qb then isTrue (by rw [h])
+    else isFalse (by intro eq; cases eq; contradiction)
   | QExpand.newQ ⟨ qa, qb, G, s, j ⟩, QExpand.newQ ⟨ qa', qb', G', s', j' ⟩ =>
-    if qa = qa' && qb = qb' && G = G' && s = s' && (↑j : Nat) == (↑j' : Nat) then
-      isTrue sorry
+    if h2 : (qa, qb, G, s, (↑j : Nat)) = (qa', qb', G', s', (↑j' : Nat)) then
+      isTrue (by
+        simp [five_tuple] at h2
+        apply congr_arg
+        simp
+        constructor
+        · simp [h2]
+        · sorry
+          -- https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#HEq
+          -- Heterogeneous equality. a ≍ b asserts that a and b have the same type,
+          -- and casting a across the equality yields b, and vice versa.
+          -- You should avoid using this type if you can.
+      )
     else
-      isFalse sorry
+      isFalse (by intro eq; cases eq; contrapose! h2; rfl)
   | QExpand.originalQ qa, QExpand.newQ ⟨ qa', qb', G', s', j' ⟩ =>
-    isFalse sorry
+    isFalse (by simp only [reduceCtorEq, not_false_eq_true])
   | QExpand.newQ ⟨ qa, qb, G, s, j ⟩, QExpand.originalQ qb' =>
-    isFalse sorry
+    isFalse (by simp only [reduceCtorEq, not_false_eq_true])
 
-instance {Q S Γ} [Fintype Q] [Fintype S] [Fintype Γ] [DecidableEq Q]
-  (M: CPSP_DPDA Q S Γ) : DecidableEq (CPSP_DPDA.expandedQ M) :=
-  sorry
+instance {Q S Γ} [Fintype Q] [Fintype S] [Fintype Γ] [DecidableEq Q] [DecidableEq Γ] [DecidableEq S]
+  (M: CPSP_DPDA Q S Γ) : DecidableEq (CPSP_DPDA.expandedQ M) := myDecEq M
 
-
-def CPSP_DPDA.toPredet {Q S Γ} [Fintype Q] [Fintype S] [Fintype Γ] [DecidableEq Q] (M: CPSP_DPDA Q S Γ)
+def CPSP_DPDA.toPredet {Q S Γ}
+  [Fintype Q] [Fintype S] [Fintype Γ]
+  [DecidableEq Q] [DecidableEq Γ] [DecidableEq S]
+ (M: CPSP_DPDA Q S Γ)
  : Predet_DPDA (M.expandedQ) S Γ :=
   let transition : M.expandedQ → Predet_Judge M.expandedQ S Γ := fun q => match q with
   | .originalQ qa => Predet_Judge.popAndDecideWhetherToConsume fun G =>
