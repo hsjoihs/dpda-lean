@@ -59,6 +59,32 @@ def CPSP_DPDA.expandedQ {Q S Γ} [Fintype Q] [Fintype S] [Fintype Γ] [Decidable
     (s : AugmentEpsilon S) ×
     Fin (match M.str qa qb G s with | none => 0 | some str => str.length)
 
+instance {Q S Γ} [Fintype Q] [Fintype S] [Fintype Γ] [DecidableEq Q]
+  (M: CPSP_DPDA Q S Γ) : Fintype (CPSP_DPDA.expandedQ M) where
+    elems := sorry
+    complete := sorry
+
+def myDecEq {Q S Γ} [Fintype Q] [Fintype S] [Fintype Γ] [DecidableEq Q] [DecidableEq Γ] [DecidableEq S]
+  (M: CPSP_DPDA Q S Γ) (a b : CPSP_DPDA.expandedQ M) : Decidable (a = b) :=
+  match a, b with
+  | QExpand.originalQ qa, QExpand.originalQ qb =>
+    if qa = qb then isTrue sorry
+    else isFalse (fun h => by cases h; sorry)
+  | QExpand.newQ ⟨ qa, qb, G, s, j ⟩, QExpand.newQ ⟨ qa', qb', G', s', j' ⟩ =>
+    if qa = qa' && qb = qb' && G = G' && s = s' && (↑j : Nat) == (↑j' : Nat) then
+      isTrue sorry
+    else
+      isFalse sorry
+  | QExpand.originalQ qa, QExpand.newQ ⟨ qa', qb', G', s', j' ⟩ =>
+    isFalse sorry
+  | QExpand.newQ ⟨ qa, qb, G, s, j ⟩, QExpand.originalQ qb' =>
+    isFalse sorry
+
+instance {Q S Γ} [Fintype Q] [Fintype S] [Fintype Γ] [DecidableEq Q]
+  (M: CPSP_DPDA Q S Γ) : DecidableEq (CPSP_DPDA.expandedQ M) :=
+  sorry
+
+
 def CPSP_DPDA.toPredet {Q S Γ} [Fintype Q] [Fintype S] [Fintype Γ] [DecidableEq Q] (M: CPSP_DPDA Q S Γ)
  : Predet_DPDA (M.expandedQ) S Γ :=
   let transition : M.expandedQ → Predet_Judge M.expandedQ S Γ := fun q => match q with
@@ -79,16 +105,37 @@ def CPSP_DPDA.toPredet {Q S Γ} [Fintype Q] [Fintype S] [Fintype Γ] [DecidableE
       /- I do not have an off-the-path state as a member of M.expandedQ -/
       rw [hα] at j
       exact j.elim0
-    | some α =>
-      let hj := j.prop
-      let n := α.length
-      if j = n - 1
-        then Predet_Judge.uncondPush (α.get (⟨ 0 , sorry ⟩ : Fin α.length), QExpand.originalQ qb)
-        else Predet_Judge.uncondPush
-          (
-            α.get (⟨n - j - 1, sorry ⟩ : Fin α.length),
+    | some [] => by
+      /- "Empty string pushed to the stack" corresponds to not spawning a new state -/
+      rw [hα] at j
+      exact j.elim0
+    | some α@h:(A :: γ) =>
+      have len_pos : 0 < α.length := by simp [h]
+      have len_nonzero : α.length ≠ 0 := by simp [h]
+      if h_end : j = α.length - 1
+        then Predet_Judge.uncondPush (α.get (⟨ 0 , len_pos ⟩ : Fin α.length), QExpand.originalQ qb)
+        else
+          have h_n1j : α.length - 1 - ↑j < α.length := by simp [h]; omega
+          have h_j1 : (↑j : Nat) + 1 < (match M.str qa qb G s with
+            | none => 0
+            | some str => str.length) := by
+            obtain u | u | u := lt_trichotomy ↑j (α.length - 1)
+            · rw [← Nat.add_one_lt_add_one_iff, Nat.sub_one_add_one len_nonzero] at u
+              simp [hα]
+              simp [h] at u
+              exact u
+            · contradiction
+            · simp [hα]
+              simp [h] at u
+              have hj2 := j.prop
+              simp [hα] at hj2
+              have hj3 : ↑j ≤ γ.length := by exact Nat.le_of_lt_add_one hj2
+              have hj4 : ¬ (γ.length < ↑j) := by exact Nat.not_lt.mpr hj3
+              contradiction
+          Predet_Judge.uncondPush (
+            α.get (⟨α.length - 1 - j, h_n1j ⟩ : Fin α.length),
             QExpand.newQ ⟨
-              qa, qb, G, s, (⟨ j + 1, sorry ⟩ : Fin (match M.str qa qb G s with | none => 0 | some str => str.length) )
+              qa, qb, G, s, (⟨ j + 1, h_j1 ⟩ : Fin (match M.str qa qb G s with | none => 0 | some str => str.length) )
             ⟩
           )
-  ⟨ sorry, sorry, transition ⟩
+  ⟨ QExpand.originalQ M.q0, Finset.image QExpand.originalQ M.F, transition ⟩
