@@ -24,15 +24,7 @@ structure Predet_DPDA (Q: Type u_) (S: Type u_) (Γ: Type u_) where
   F : Finset Q
   transition : Predet_Transition Q S Γ
 
-def inclusionL_ {Q: Type u_} {Γ: Type u_} (v: (Γ × Q) ⊕ (AugmentZ0 Γ → Option (Unit × Q))) :
-  WobblyFn (AugmentZ0 Γ) (AugmentEpsilon Γ × Q) :=
-  match v with
-  | .inl (γ, q) => WobblyFn.noWant (AugmentEpsilon.fromChar γ, q)
-  | .inr f =>
-    WobblyFn.want fun r =>
-     match f r with
-      | none => none
-      | some ((), q) => some (AugmentEpsilon.Epsilon, q)
+
 
 def Le1P2_Transition.stepTransition {Q: Type u_} {S: Type u_} {Γ: Type u_}
   (hat_delta: Le1P2_Transition Q S Γ)
@@ -65,15 +57,17 @@ def valForUncondPop2_ {Q: Type u_} {S: Type u_} {Γ: Type u_}
 
 /-
 
-def wob {U V} (wf : WobblyFn U V) (s : List U) : Option (V × List U) :=
+def wobZ {Γ V} (wf : WobblyFn (AugmentZ0 Γ) V) (β : List Γ) : Option (V × List Γ) :=
   match wf with
-  | WobblyFn.noWant v => some (v, s)
-  | WobblyFn.want f => match s with
-    | [] => none
-    | A :: t =>
-      match f A with
+  | WobblyFn.noWant v => some (v, β)
+  | WobblyFn.want f => match β with
+    | [] =>  match f AugmentZ0.z0 with
       | none => none
-      | some v => some (v, t)
+      | some v => some (v, [])
+    | A :: γ =>
+      match f (AugmentZ0.fromΓ A) with
+      | none => none
+      | some v => some (v, γ)
 
 -/
 
@@ -84,9 +78,20 @@ def Predet_Transition.stepTransition {Q: Type u_} {S: Type u_} {Γ: Type u_}
   let fo : Option (Le1P2_DPDA_IDesc Q S Γ) :=
     (
       match transition pwβ.p with
-      | Predet_Judge.uncondPush γq =>
-        let v : WobblyFn (AugmentZ0 Γ) (AugmentEpsilon Γ × Q) := (inclusionL_ <| Sum.inl γq)
-        wobZ v pwβ.β >>= lambdaForObserveInput pwβ.w
+      | Predet_Judge.uncondPush (γ, q) =>
+        let wf : WobblyFn (AugmentZ0 Γ) (AugmentEpsilon Γ × Q) := WobblyFn.noWant (AugmentEpsilon.fromChar γ, q)
+        (
+          match wf with
+            | WobblyFn.noWant v => some (v, pwβ.β)
+            | WobblyFn.want f => match pwβ.β with
+              | [] =>  match f AugmentZ0.z0 with
+                | none => none
+                | some v => some (v, [])
+              | A :: γ =>
+                match f (AugmentZ0.fromΓ A) with
+                | none => none
+                | some v => some (v, γ)
+        ) >>= lambdaForObserveInput pwβ.w
       | Predet_Judge.popAndDecideWhetherToConsume f =>
         let f_Γ_wSq' : AugmentZ0 Γ → Option (WobblyFn S (AugmentEpsilon Γ × Q)) := (
           fun r =>
