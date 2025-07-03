@@ -10,6 +10,49 @@ def Hopcroft_DPDA_IDesc.fromCPSP {Q S Γ} [Fintype Q] [DecidableEq Q] [Fintype S
   (pwβ: CPSP_DPDA_IDesc Q S Γ) : Hopcroft_DPDA_IDesc Q S (AugmentZ0 Γ) :=
   ⟨pwβ.p, pwβ.w, pwβ.β.map AugmentZ0.fromΓ ++ [AugmentZ0.z0]⟩
 
+def Hopcroft_DPDA.Δ {Q S Γ} (M: Hopcroft_DPDA Q S Γ) : Q × Γ → CPSP_Judge (AugmentOneState Q) S Γ :=
+  fun (q, X) =>
+    match M.pda.transition (q, none, X) with
+    | some (p, α) => CPSP_Judge.immediate (some (α, AugmentOneState.fromQ p))
+    | none => CPSP_Judge.step fun a =>
+      match M.pda.transition (q, some a, X) with
+      | some (p, α) => some (α, AugmentOneState.fromQ p)
+      | none => none
+
+def Hopcroft_DPDA.fromCPSP {Q S Γ} (M_tilde: CPSP_DPDA Q S Γ): Hopcroft_DPDA Q S (AugmentZ0 Γ) :=
+  let q0 := M_tilde.q0
+  let z_0 := AugmentZ0.z0
+  let F := M_tilde.F
+  let new_transition : Q × Option S × AugmentZ0 Γ → Option (Q × List (AugmentZ0 Γ)) :=
+    fun (q, a, X) => match a with
+      | none => match M_tilde.transition (q, X) with
+        | CPSP_Judge.immediate none => none
+        | CPSP_Judge.immediate (some (α, p)) =>
+            match X with
+            | AugmentZ0.z0 => some (p, (α.map AugmentZ0.fromΓ) ++ [X])
+            | _ => some (p, α.map AugmentZ0.fromΓ)
+        | CPSP_Judge.step f => none
+      | some a => match M_tilde.transition (q, X) with
+        | CPSP_Judge.immediate _ => none
+        | CPSP_Judge.step f => match f a with
+          | none => none
+          | some (α, p) =>
+             match X with
+              | AugmentZ0.z0 => some (p, (α.map AugmentZ0.fromΓ) ++ [X] )
+              | _ => some (p, α.map AugmentZ0.fromΓ)
+  let pda : Hopcroft_PreDPDA Q S (AugmentZ0 Γ) := ⟨q0, z_0, F, new_transition⟩
+  let deterministic : (∀ q X, (∃ a, pda.transition (q, some a, X) ≠ none) → pda.transition (q, none, X) = none) := by
+    intros q X h
+    rw [show pda.transition = new_transition from rfl]
+    dsimp only [new_transition]
+    rw [show pda.transition = new_transition from rfl] at h
+    dsimp only [new_transition] at h
+    rcases h with ⟨a, h⟩
+    cases hc : M_tilde.transition (q, X) with
+    | immediate _ => rw [hc] at h; contradiction
+    | step _ => rw [hc] at h
+  ⟨pda, deterministic⟩
+
 theorem CPSP_to_Hopcroft_preserves_semantics_single_step {Q S Γ}
   [Fintype Q] [DecidableEq Q] [Fintype S /- Σ -/] [Fintype Γ] [DecidableEq Γ]
   (M: CPSP_DPDA Q S Γ) (idesc: CPSP_DPDA_IDesc Q S Γ) :
