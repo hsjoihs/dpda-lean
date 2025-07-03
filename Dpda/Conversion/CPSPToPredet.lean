@@ -49,6 +49,17 @@ def CPSP_DPDA.str {Q S Γ} [Fintype Q] [Fintype S] [Fintype Γ] [DecidableEq Q] 
 inductive QExpand (Q: Type) (R: Type) where
   | originalQ : Q → QExpand Q R
   | newQ : R → QExpand Q R
+deriving DecidableEq
+
+
+instance {Q R} [Fintype Q] [Fintype R] [DecidableEq Q] [DecidableEq R] : Fintype (QExpand Q R) where
+  elems := Finset.image QExpand.originalQ Finset.univ ∪ Finset.image QExpand.newQ Finset.univ
+  complete := by
+    intro x
+    simp only [Finset.mem_union, Finset.mem_image, QExpand.originalQ, QExpand.newQ]
+    cases x with
+    | originalQ q => left; use q; simp
+    | newQ r => right; use r; simp
 
 def CPSP_DPDA.expandedQ {Q S Γ} [Fintype Q] [Fintype S] [Fintype Γ] [DecidableEq Q]
   (M: CPSP_DPDA Q S Γ) : Type
@@ -58,11 +69,6 @@ def CPSP_DPDA.expandedQ {Q S Γ} [Fintype Q] [Fintype S] [Fintype Γ] [Decidable
     (G : AugmentZ0 Γ) ×
     (s : AugmentEpsilon S) ×
     Fin (match M.str qa qb G s with | none => 0 | some str => str.length)
-
-instance {Q S Γ} [Fintype Q] [Fintype S] [Fintype Γ] [DecidableEq Q]
-  (M: CPSP_DPDA Q S Γ) : Fintype (CPSP_DPDA.expandedQ M) where
-    elems := sorry
-    complete := sorry
 
 theorem five_tuple {A B C D E} (t1 : A × B × C × D × E) (t2 : A × B × C × D × E) :
   t1 = t2 ↔
@@ -104,15 +110,25 @@ def CPSP_DPDA.toPredet {Q S Γ}
  : Predet_DPDA (M.expandedQ) S Γ :=
   let transition : M.expandedQ → Predet_Judge M.expandedQ S Γ := fun q => match q with
   | .originalQ qa => Predet_Judge.popAndDecideWhetherToConsume fun G =>
-    match M.transition (qa, G) with
+    match h2 : M.transition (qa, G) with
     | CPSP_Judge.immediate none => none
     | CPSP_Judge.immediate (some ([], qb)) => some (Sum.inl (QExpand.originalQ qb))
-    | CPSP_Judge.immediate (some (α, qb)) =>
-      some ∘ Sum.inl ∘ QExpand.newQ <| ⟨ qa, qb, G, AugmentEpsilon.Epsilon, Fin.mk 0 sorry ⟩
+    | CPSP_Judge.immediate (some (α@h:(A :: γ), qb)) =>
+      have ha : M.str qa qb G AugmentEpsilon.Epsilon = some α := by simp [CPSP_DPDA.str, h2]; symm; exact h
+      have len_pos : 0 < match M.str qa qb G AugmentEpsilon.Epsilon with
+        | none => 0
+        | some str => str.length := by simp [ha, h]
+      some ∘ Sum.inl ∘ QExpand.newQ <| ⟨ qa, qb, G, AugmentEpsilon.Epsilon, Fin.mk 0 len_pos ⟩
     | CPSP_Judge.step f => some <| Sum.inr fun a =>
-      match f a with
+      match h3 : f a with
       | some ([], qb) => some (QExpand.originalQ qb)
-      | some (α, qb) => some (QExpand.newQ ⟨ qa, qb, G, AugmentEpsilon.fromChar a, Fin.mk 0 sorry ⟩ )
+      | some (α@h:(A :: γ), qb) =>
+        have ha : M.str qa qb G (AugmentEpsilon.fromChar a) = some α := by
+          simp [CPSP_DPDA.str, h2, h3]; symm; exact h
+        have len_pos : 0 < match M.str qa qb G (AugmentEpsilon.fromChar a) with
+          | none => 0
+          | some str => str.length := by simp [ha, h]
+        some (QExpand.newQ ⟨ qa, qb, G, AugmentEpsilon.fromChar a, Fin.mk 0 len_pos ⟩ )
       | _ => none
   | .newQ ⟨ qa, qb, G, s, j ⟩  =>
     match hα : M.str qa qb G s with
