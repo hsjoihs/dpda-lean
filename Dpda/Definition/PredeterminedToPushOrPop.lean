@@ -33,9 +33,7 @@ def Predet_Transition.stepTransition {Q: Type u_} {S: Type u_} {Γ: Type u_}
       match transition pwβ.p with
       | Predet_Judge.uncondPush (γ, q) => some ⟨q, pwβ.w, γ :: pwβ.β⟩
       | Predet_Judge.popAndDecideWhetherToConsume f =>
-        let f_Γ_wSq' : AugmentZ0 Γ → Option (WobblyFn S (AugmentEpsilon Γ × Q)) := (
-          fun r =>
-            (
+        let inner : Q ⊕ (S → Option Q) → WobblyFn S (AugmentEpsilon Γ × Q) := (
               fun a => match a with
               | Sum.inl q => WobblyFn.noWant (AugmentEpsilon.Epsilon, q)
               | Sum.inr f2 =>
@@ -43,11 +41,10 @@ def Predet_Transition.stepTransition {Q: Type u_} {S: Type u_} {Γ: Type u_}
                   match f2 s with
                   | none => none
                   | some q => some  (AugmentEpsilon.Epsilon, q)
-            ) <$> f r
-        )
+            )
         match pwβ.β with
           | [] =>
-            f_Γ_wSq' AugmentZ0.z0 >>=
+            inner <$> f AugmentZ0.z0 >>=
               fun wf => (
                 match wf with
                 | WobblyFn.noWant v => some (v, pwβ.w)
@@ -60,7 +57,7 @@ def Predet_Transition.stepTransition {Q: Type u_} {S: Type u_} {Γ: Type u_}
                   ) >>=
                 fun ⟨ ⟨ α, q ⟩, x⟩  => some ⟨q, x, α.toList⟩
           | A :: γ =>
-              f_Γ_wSq' (AugmentZ0.fromΓ A) >>=
+              inner <$> f (AugmentZ0.fromΓ A) >>=
               fun wf => (
                 match wf with
                 | WobblyFn.noWant v => some (v, pwβ.w)
