@@ -34,18 +34,6 @@ def inclusionL_ {Q: Type u_} {Γ: Type u_} (v: (Γ × Q) ⊕ (AugmentZ0 Γ → O
       | none => none
       | some ((), q) => some (AugmentEpsilon.Epsilon, q)
 
-def inclusionL {Q: Type u_} {S: Type u_} {Γ: Type u_} (wf_S_wΓ: WobblyFn S ((Γ × Q) ⊕ (AugmentZ0 Γ → Option (Unit × Q)))) :
-  WobblyFn S (WobblyFn (AugmentZ0 Γ) (AugmentEpsilon Γ × Q)) :=
-  wf_S_wΓ.fmap inclusionL_
-
-def inclusionR {Q: Type u_} {S: Type u_} {Γ: Type u_}
-  (f_Γ_wSq: AugmentZ0 Γ → Option (WobblyFn S (Unit × Q))) :
-  AugmentZ0 Γ → Option (WobblyFn S (AugmentEpsilon Γ × Q)) :=
-  fun r =>
-    match f_Γ_wSq r with
-    | none => none
-    | some wf_S_wΓ => some (wf_S_wΓ.fmap fun ⟨(), q⟩ => (AugmentEpsilon.Epsilon, q))
-
 def Le1P2_Transition.stepTransition {Q: Type u_} {S: Type u_} {Γ: Type u_}
   (hat_delta: Le1P2_Transition Q S Γ)
   (pwβ: Le1P2_DPDA_IDesc Q S Γ)
@@ -60,6 +48,35 @@ def Le1P2_Transition.stepTransition {Q: Type u_} {S: Type u_} {Γ: Type u_}
     | A :: γ => valForUncondPop2 A γ pwβ.w f_Γ_wSq
 
 
+def valForUncondPop1_ {Q: Type u_} {S: Type u_} {Γ: Type u_}
+  (pwβ_w : List S) (f_Γ_wSq' : AugmentZ0 Γ → Option (WobblyFn S (AugmentEpsilon Γ × Q)))
+  : Option (Le1P2_DPDA_IDesc Q S Γ) :=
+  f_Γ_wSq' AugmentZ0.z0 >>=
+    fun fwS => wob fwS pwβ_w >>=
+      fun ⟨ ⟨ α, q ⟩, x⟩  => some ⟨q, x, α.toList⟩
+
+def valForUncondPop2_ {Q: Type u_} {S: Type u_} {Γ: Type u_}
+  (A : Γ) (γ : List Γ) (pwβ_w : List S)
+  (f_Γ_wSq' : AugmentZ0 Γ → Option (WobblyFn S (AugmentEpsilon Γ × Q)))
+  : Option (Le1P2_DPDA_IDesc Q S Γ) :=
+  f_Γ_wSq' (AugmentZ0.fromΓ A) >>=
+    fun fwS => wob fwS pwβ_w >>=
+      fun ⟨ ⟨ α, q ⟩, x⟩  => some ⟨q, x, α.toList ++ γ⟩
+
+/-
+
+def wob {U V} (wf : WobblyFn U V) (s : List U) : Option (V × List U) :=
+  match wf with
+  | WobblyFn.noWant v => some (v, s)
+  | WobblyFn.want f => match s with
+    | [] => none
+    | A :: t =>
+      match f A with
+      | none => none
+      | some v => some (v, t)
+
+-/
+
 def Predet_Transition.stepTransition {Q: Type u_} {S: Type u_} {Γ: Type u_}
   (transition: Predet_Transition Q S Γ)
   (pwβ: Predet_DPDA_IDesc Q S Γ)
@@ -67,8 +84,11 @@ def Predet_Transition.stepTransition {Q: Type u_} {S: Type u_} {Γ: Type u_}
   let fo : Option (Le1P2_DPDA_IDesc Q S Γ) :=
     (
       match transition pwβ.p with
+      | Predet_Judge.uncondPush γq =>
+        let v : WobblyFn (AugmentZ0 Γ) (AugmentEpsilon Γ × Q) := (inclusionL_ <| Sum.inl γq)
+        wobZ v pwβ.β >>= lambdaForObserveInput pwβ.w
       | Predet_Judge.popAndDecideWhetherToConsume f =>
-        let f_Γ_wSq' := (
+        let f_Γ_wSq' : AugmentZ0 Γ → Option (WobblyFn S (AugmentEpsilon Γ × Q)) := (
           fun r =>
             match
             (match f r with
@@ -80,13 +100,10 @@ def Predet_Transition.stepTransition {Q: Type u_} {S: Type u_} {Γ: Type u_}
             | some wf_S_wΓ => some (wf_S_wΓ.fmap fun ⟨(), q⟩ => (AugmentEpsilon.Epsilon, q))
         )
         match pwβ.β with
-          | [] => valForUncondPop1 pwβ.w f_Γ_wSq'
-          | A :: γ => valForUncondPop2 A γ pwβ.w f_Γ_wSq'
-      | Predet_Judge.uncondPush γq =>
-        wob (inclusionL (WobblyFn.noWant (Sum.inl γq))) pwβ.w >>=
-          fun ⟨wfΓ, x⟩ => wobZ wfΓ pwβ.β >>= lambdaForObserveInput x
+          | [] => valForUncondPop1_ pwβ.w f_Γ_wSq'
+          | A :: γ => valForUncondPop2_ A γ pwβ.w f_Γ_wSq'
     )
-  fo |>.map fun idesc =>
+  fo.map fun idesc =>
   { p := idesc.p,
     w := idesc.w,
     β := idesc.β }
