@@ -35,14 +35,15 @@ def Predet_Transition.stepTransition {Q: Type u_} {S: Type u_} {Γ: Type u_}
       | Predet_Judge.popAndDecideWhetherToConsume f =>
         let f_Γ_wSq' : AugmentZ0 Γ → Option (WobblyFn S (AugmentEpsilon Γ × Q)) := (
           fun r =>
-            match
-            (match f r with
-            | none => none
-            | some u => WobblyFn.from u).map
-               (WobblyFn.fmap fun q => ((), q))
-             with
-            | none => none
-            | some wf_S_wΓ => some (wf_S_wΓ.fmap fun ⟨(), q⟩ => (AugmentEpsilon.Epsilon, q))
+            (
+              fun a => match a with
+              | Sum.inl q => WobblyFn.noWant (AugmentEpsilon.Epsilon, q)
+              | Sum.inr f2 =>
+                WobblyFn.want fun s =>
+                  match f2 s with
+                  | none => none
+                  | some q => some  (AugmentEpsilon.Epsilon, q)
+            ) <$> f r
         )
         match pwβ.β with
           | [] =>
