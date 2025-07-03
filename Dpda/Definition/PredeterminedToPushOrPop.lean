@@ -34,7 +34,7 @@ def Predet_Transition.stepTransition {Q: Type u_} {S: Type u_} {Γ: Type u_}
       | Predet_Judge.uncondPush (γ, q) => some ⟨q, pwβ.w, γ :: pwβ.β⟩
       | Predet_Judge.popAndDecideWhetherToConsume f =>
         let inner : Q ⊕ (S → Option Q) → WobblyFn S (AugmentEpsilon Γ × Q) := (
-              fun a => match a with
+              fun k => match k with
               | Sum.inl q => WobblyFn.noWant (AugmentEpsilon.Epsilon, q)
               | Sum.inr f2 =>
                 WobblyFn.want fun s =>
@@ -44,22 +44,24 @@ def Predet_Transition.stepTransition {Q: Type u_} {S: Type u_} {Γ: Type u_}
             )
         match pwβ.β with
           | [] =>
-            inner <$> f AugmentZ0.z0 >>=
-              fun wf => (
-                match wf with
-                | WobblyFn.noWant v => some (v, pwβ.w)
-                | WobblyFn.want f => match pwβ.w with
-                  | [] => none
-                  | A :: t =>
-                    match f A with
-                    | none => none
-                    | some v => some (v, t)
-                  ) >>=
-                fun ⟨ ⟨ α, q ⟩, x⟩  => some ⟨q, x, α.toList⟩
+            do
+              let k ← f AugmentZ0.z0
+              let ⟨ ⟨ α, q ⟩, x⟩ ← (
+                  match inner k with
+                  | WobblyFn.noWant v => some (v, pwβ.w)
+                  | WobblyFn.want f => match pwβ.w with
+                    | [] => none
+                    | A :: t =>
+                      match f A with
+                      | none => none
+                      | some v => some (v, t)
+                    )
+              some ⟨q, x, α.toList⟩
           | A :: γ =>
-              inner <$> f (AugmentZ0.fromΓ A) >>=
-              fun wf => (
-                match wf with
+            do
+              let k ← f (AugmentZ0.fromΓ A)
+              let ⟨ ⟨ α, q ⟩, x⟩ ← (
+                match inner k with
                 | WobblyFn.noWant v => some (v, pwβ.w)
                 | WobblyFn.want f => match pwβ.w with
                   | [] => none
@@ -67,8 +69,8 @@ def Predet_Transition.stepTransition {Q: Type u_} {S: Type u_} {Γ: Type u_}
                     match f A with
                     | none => none
                     | some v => some (v, t)
-                  ) >>=
-                fun ⟨ ⟨ α, q ⟩, x⟩ => some ⟨q, x, α.toList ++ γ⟩
+                  )
+              some ⟨q, x, α.toList ++ γ⟩
     )
   fo.map fun idesc =>
   { p := idesc.p,
