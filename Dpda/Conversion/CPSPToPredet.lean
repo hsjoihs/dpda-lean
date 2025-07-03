@@ -84,14 +84,8 @@ def myDecEq {Q S Γ} [Fintype Q] [Fintype S] [Fintype Γ] [DecidableEq Q] [Decid
       isTrue (by
         simp [five_tuple] at h2
         apply congr_arg
-        simp
-        constructor
-        · simp [h2]
-        · sorry
-          -- https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#HEq
-          -- Heterogeneous equality. a ≍ b asserts that a and b have the same type,
-          -- and casting a across the equality yields b, and vice versa.
-          -- You should avoid using this type if you can.
+        obtain ⟨ rfl, rfl, rfl, rfl, hj ⟩ := h2
+        simp [Fin.ext_iff, hj]
       )
     else
       isFalse (by intro eq; cases eq; contrapose! h2; rfl)
