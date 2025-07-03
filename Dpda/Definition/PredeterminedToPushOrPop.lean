@@ -64,23 +64,17 @@ def Predet_Transition.stepTransition {Q: Type u_} {S: Type u_} {Γ: Type u_}
   (transition: Predet_Transition Q S Γ)
   (pwβ_: Predet_DPDA_IDesc Q S Γ)
   : Option (Predet_DPDA_IDesc Q S Γ) :=
-  let hat_delta : Le1P2_Transition Q S Γ := (
-    fun q =>
-          match transition q with
-          | Predet_Judge.popAndDecideWhetherToConsume f =>
-            PP2_Judge.uncondPop fun Γz =>
-              ((match f Γz with
-                | none => none
-                | some u => WobblyFn.from u) : Option (WobblyFn S Q)).map
-              (WobblyFn.fmap fun q => ((), q))
-          | Predet_Judge.uncondPush γq =>
-            PP2_Judge.observeInput (WobblyFn.noWant (.inl γq))
-  ) |> fun transition q =>
-    match transition q with
-      | PP2_Judge.observeInput wf_S_wΓ =>
-        Le1P2_Judge.observeInput (inclusionL wf_S_wΓ)
-      | PP2_Judge.uncondPop f_Γ_wSq =>
-        Le1P2_Judge.uncondPop (inclusionR f_Γ_wSq)
+  let hat_delta : Le1P2_Transition Q S Γ := fun q => match transition q with
+    | Predet_Judge.popAndDecideWhetherToConsume f =>
+      let f_Γ_wSq := fun Γz =>
+        ((match f Γz with
+          | none => none
+          | some u => WobblyFn.from u) : Option (WobblyFn S Q)).map
+        (WobblyFn.fmap fun q => ((), q))
+      Le1P2_Judge.uncondPop (inclusionR f_Γ_wSq)
+    | Predet_Judge.uncondPush γq =>
+      let wf_S_wΓ := (WobblyFn.noWant (.inl γq))
+      Le1P2_Judge.observeInput (inclusionL wf_S_wΓ)
   let pwβ : Le1P2_DPDA_IDesc Q S Γ :=
     { p := pwβ_.p
     , w := pwβ_.w
