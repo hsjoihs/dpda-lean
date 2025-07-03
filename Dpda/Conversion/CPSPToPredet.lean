@@ -30,8 +30,11 @@ def CPSP_DPDA.max_string_length {Q S Γ} [Fintype Q] [Fintype S] [Fintype Γ]
   | some maximum => maximum
   | none => 0
 
-def CPSP_DPDA.expandedQ {Q S Γ} [Fintype Q] [Fintype S] [Fintype Γ] (M: CPSP_DPDA Q S Γ) : Type :=
-  Q × Q × AugmentZ0 Γ × AugmentEpsilon S × Fin (M.max_string_length)
+inductive QExpand Q S Γ (n : Nat)
+| originalQ : Q → QExpand Q S Γ n
+| newQ : Q × Q × AugmentZ0 Γ × AugmentEpsilon S × Fin n → QExpand Q S Γ n
+
+def CPSP_DPDA.expandedQ {Q S Γ} [Fintype Q] [Fintype S] [Fintype Γ] (M: CPSP_DPDA Q S Γ) : Type := QExpand Q S Γ (M.max_string_length + 1)
 
 def CPSP_DPDA.str {Q S Γ} [Fintype Q] [Fintype S] [Fintype Γ] [DecidableEq Q] (M: CPSP_DPDA Q S Γ)
   (qa : Q) (qb : Q) (G : AugmentZ0 Γ) (Sε : AugmentEpsilon S) : Option (List Γ) :=
@@ -48,3 +51,30 @@ def CPSP_DPDA.str {Q S Γ} [Fintype Q] [Fintype S] [Fintype Γ] [DecidableEq Q] 
     | CPSP_Judge.step f => match f a with
       | none => none
       | some (α, q) => if q = qb then some α else none
+
+def CPSP_DPDA.toPredet {Q S Γ} [Fintype Q] [Fintype S] [Fintype Γ] [DecidableEq Q] (M: CPSP_DPDA Q S Γ)
+ : Predet_DPDA (M.expandedQ) S Γ :=
+  let transition : M.expandedQ → Predet_Judge M.expandedQ S Γ := fun q => match q with
+  | .originalQ qa => Predet_Judge.popAndDecideWhetherToConsume fun G =>
+    match M.transition (qa, G) with
+    | CPSP_Judge.immediate none => none
+    | CPSP_Judge.immediate (some ([], qb)) => some (Sum.inl (QExpand.originalQ qb))
+    | CPSP_Judge.immediate (some (α, qb)) => some (Sum.inl (QExpand.newQ
+        (qa, qb, G, AugmentEpsilon.Epsilon, Fin.mk 0 (Nat.zero_lt_succ _))
+      ))
+    | CPSP_Judge.step f => some <| Sum.inr fun a =>
+      match f a with
+      | some ([], qb) => some (QExpand.originalQ qb)
+      | some (α, qb) => some (QExpand.newQ (qa, qb, G, AugmentEpsilon.fromChar a, 0))
+      | _ => none
+  | .newQ (qa, qb, G, s, j) =>
+    let maybe_alpha := M.str qa qb G s
+    match maybe_alpha with
+    | some α =>
+      let n := α.length
+      if j = n - 1 then sorry /- (α.get 0 _, qb) -/ else sorry /- (α.get (n - j - 1) _, QExpand.newQ (qa, qb, G, s, j+1)) -/
+    | none => /-
+      ideally, I do not want to have such an off-the-path state as a member of M.expandedQ
+      However, it is included in the current definition. Hmm.
+    -/ sorry
+  ⟨ sorry, sorry, transition ⟩
