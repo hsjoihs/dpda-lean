@@ -7,6 +7,10 @@ This repository serves as the formal proof of the LaTeX summary available here: 
 
 [A TypeScript version](https://github.com/hsjoihs/various-DPDA-formulations-ts) is also available.
 
+## Current progress
+
+![](./overview.png)
+
 ## Conventions
 
 The standard way in the literature is to incorporate $Z_0$ into $\Gamma$ and **trust** that the designer of the DPDA would always put back a $Z_0$ at the bottom whenever it is consumed. Here I seek to make a formulation that does not rely on such trust. Hence, I will assume that the an stack returns $\text{undefined}$ when popped. 
