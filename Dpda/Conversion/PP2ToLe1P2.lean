@@ -6,7 +6,7 @@ universe u_
 def inclusionL_ {Q: Type u_} {Γ: Type u_} (v: (Γ × Q) ⊕ (AugmentZ0 Γ → Option (Unit × Q))) :
   WobblyFn (AugmentZ0 Γ) (AugmentEpsilon Γ × Q) :=
   match v with
-  | .inl (γ, q) => WobblyFn.noWant (AugmentEpsilon.fromΓ γ, q)
+  | .inl (γ, q) => WobblyFn.noWant (AugmentEpsilon.fromChar γ, q)
   | .inr f =>
     WobblyFn.want fun r =>
      match f r with

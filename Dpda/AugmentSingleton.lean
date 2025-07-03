@@ -51,18 +51,18 @@ instance AugmentOneState.fintype {Q} [ft : Fintype Q]: Fintype (AugmentOneState 
 
 -- $\Gamma_\varepsilon := \{ j \in \Gamma^* \mid \operatorname{len}(j) \le 1 \} \cong \Gamma \cup \{ \varepsilon \} $
 inductive AugmentEpsilon (Γ: Type u) where
-  | fromΓ : Γ → AugmentEpsilon Γ
+  | fromChar : Γ → AugmentEpsilon Γ
   | Epsilon : AugmentEpsilon Γ
 deriving DecidableEq
 
 
 def augmentEpsilon_option_equiv {Γ} : AugmentEpsilon Γ ≃ Option Γ :=
   let toFn : AugmentEpsilon Γ → Option Γ
-      | AugmentEpsilon.fromΓ g => some g
+      | AugmentEpsilon.fromChar g => some g
       | AugmentEpsilon.Epsilon => none
   let backFn : Option Γ → AugmentEpsilon Γ
       | none => AugmentEpsilon.Epsilon
-      | some g => AugmentEpsilon.fromΓ g
+      | some g => AugmentEpsilon.fromChar g
   { toFun := toFn, invFun := backFn,
     left_inv := by intro a; cases a <;> rfl,
     right_inv := by intro o; cases o <;> rfl }
@@ -71,5 +71,5 @@ instance AugmentEpsilon.fintype {Γ} [ft : Fintype Γ]: Fintype (AugmentEpsilon 
 
 def AugmentEpsilon.toList {Γ} (α: AugmentEpsilon Γ) : List Γ :=
   match α with
-  | AugmentEpsilon.fromΓ g => [g]
+  | AugmentEpsilon.fromChar g => [g]
   | AugmentEpsilon.Epsilon => []
