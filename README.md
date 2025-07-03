@@ -28,11 +28,11 @@ In mathematical notation, let $U \stackrel{{\sqcup}}{\nrightarrow} V$ to mean $(
 
 Here, I will present five different formulations of deterministic pushdown automata (DPDA) that are proven (in the LaTeX summary) to be equivalent in power. I name the five formulations as follows:
 
-1. Predetermined-to-push-or-pop DPDA: [./Dpda/PredeterminedToPushOrPop.lean](./Dpda/PredeterminedToPushOrPop.lean)
+1. Predetermined-to-push-or-pop DPDA: [./Dpda/Definition/PredeterminedToPushOrPop.lean](./Dpda/Definition/PredeterminedToPushOrPop.lean)
 2. Push-or-pop DPDA #1
-3. Push-or-pop DPDA #2: [./Dpda/PushOrPop2.lean](./Dpda/PushOrPop2.lean)
-4. (≤1, ≤1)-DPDA: [./Dpda/Le1PopLe1Push.lean](./Dpda/Dpda/Le1PopLe1Push.lean)
-5. Character-popping, string-pushing DPDA (a.k.a. (1, n)-DPDA): [./Dpda/CharPopStringPush.lean](./Dpda/CharPopStringPush.lean)
+3. Push-or-pop DPDA #2: [./Dpda/PushOrPop2.lean](./Dpda/Definition/PushOrPop2.lean)
+4. (≤1, ≤1)-DPDA: [./Dpda/Definition/Le1PopLe1Push.lean](./Dpda/Definition/Le1PopLe1Push.lean)
+5. Character-popping, string-pushing DPDA (a.k.a. (1, n)-DPDA): [./Dpda/Definition/CharPopStringPush.lean](./Dpda/Definition/CharPopStringPush.lean)
 
 Each model allows for a different way of defining the transition function, while all adhering to the principle of "make invalid states unrepresentable" and, most importantly, makes every transition deterministic.
 
@@ -52,7 +52,6 @@ The following table shows which stack operations are allowed under each formulat
 
 The transition function encodes the behavior of the DPDA. The key difference in the five formulations lies in the way the transition function is defined. Hence, I will first provide the types of the transition functions for each of the five formulations.
 
-`interconversion.ts` contains functions that convert between the five formulations. The TypeScript compiler will check that the converters makes sense in terms of types (i.e. whether the definitions typechecks), but it will not check that the converters are actually semantically correct.  
 The conversions 1 → 2, 2 → 3, 3 → 4, and 4 → 5 are basically an increasingly intricate inclusion maps. The conversion 5 → 1 is quite non-trivial and in general increases the number of states.
 
 ### 1. Predetermined-to-push-or-pop DPDA (PPP-DPDA)
