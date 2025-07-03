@@ -24,22 +24,6 @@ structure Predet_DPDA (Q: Type u_) (S: Type u_) (Γ: Type u_) where
   F : Finset Q
   transition : Predet_Transition Q S Γ
 
-/-
-
--- wobbly consumption
-def wob {U V} (wf : WobblyFn U V) (s : List U) : Option (V × List U) :=
-  match wf with
-  | WobblyFn.noWant v => some (v, s)
-  | WobblyFn.want f => match s with
-    | [] => none
-    | A :: t =>
-      match f A with
-      | none => none
-      | some v => some (v, t)
-
-
--/
-
 def Predet_Transition.stepTransition {Q: Type u_} {S: Type u_} {Γ: Type u_}
   (transition: Predet_Transition Q S Γ)
   (pwβ: Predet_DPDA_IDesc Q S Γ)
@@ -63,7 +47,16 @@ def Predet_Transition.stepTransition {Q: Type u_} {S: Type u_} {Γ: Type u_}
         match pwβ.β with
           | [] =>
             f_Γ_wSq' AugmentZ0.z0 >>=
-              fun fwS => wob fwS pwβ.w >>=
+              fun wf => (
+                match wf with
+                | WobblyFn.noWant v => some (v, pwβ.w)
+                | WobblyFn.want f => match pwβ.w with
+                  | [] => none
+                  | A :: t =>
+                    match f A with
+                    | none => none
+                    | some v => some (v, t)
+                  ) >>=
                 fun ⟨ ⟨ α, q ⟩, x⟩  => some ⟨q, x, α.toList⟩
           | A :: γ =>
               f_Γ_wSq' (AugmentZ0.fromΓ A) >>=
