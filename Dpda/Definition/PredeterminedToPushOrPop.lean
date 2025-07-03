@@ -24,41 +24,19 @@ structure Predet_DPDA (Q: Type u_) (S: Type u_) (Γ: Type u_) where
   F : Finset Q
   transition : Predet_Transition Q S Γ
 
-
-
-def Le1P2_Transition.stepTransition {Q: Type u_} {S: Type u_} {Γ: Type u_}
-  (hat_delta: Le1P2_Transition Q S Γ)
-  (pwβ: Le1P2_DPDA_IDesc Q S Γ)
-  : Option (Le1P2_DPDA_IDesc Q S Γ) :=
-  match hat_delta pwβ.p with
-  | Le1P2_Judge.observeInput wf_S_wΓ =>
-    wob wf_S_wΓ pwβ.w >>=
-      fun ⟨wfΓ, x⟩ => wobZ wfΓ pwβ.β >>= lambdaForObserveInput x
-  | Le1P2_Judge.uncondPop f_Γ_wSq =>
-    match pwβ.β with
-    | [] => valForUncondPop1 pwβ.w f_Γ_wSq
-    | A :: γ => valForUncondPop2 A γ pwβ.w f_Γ_wSq
-
-
-def valForUncondPop1_ {Q: Type u_} {S: Type u_} {Γ: Type u_}
-  (pwβ_w : List S) (f_Γ_wSq' : AugmentZ0 Γ → Option (WobblyFn S (AugmentEpsilon Γ × Q)))
-  : Option (Le1P2_DPDA_IDesc Q S Γ) :=
-  f_Γ_wSq' AugmentZ0.z0 >>=
-    fun fwS => wob fwS pwβ_w >>=
-      fun ⟨ ⟨ α, q ⟩, x⟩  => some ⟨q, x, α.toList⟩
-
-def valForUncondPop2_ {Q: Type u_} {S: Type u_} {Γ: Type u_}
-  (A : Γ) (γ : List Γ) (pwβ_w : List S)
-  (f_Γ_wSq' : AugmentZ0 Γ → Option (WobblyFn S (AugmentEpsilon Γ × Q)))
-  : Option (Le1P2_DPDA_IDesc Q S Γ) :=
-  f_Γ_wSq' (AugmentZ0.fromΓ A) >>=
-    fun fwS => wob fwS pwβ_w >>=
-      fun ⟨ ⟨ α, q ⟩, x⟩  => some ⟨q, x, α.toList ++ γ⟩
-
 /-
 
-def lambdaForObserveInput {Q: Type u_} {S: Type u_} {Γ: Type u_} (x : List S) : (AugmentEpsilon Γ × Q) × List Γ → Option (Le1P2_DPDA_IDesc Q S Γ)
- := fun ⟨(α, q), γ⟩ => some ⟨q, x, α.toList ++ γ⟩
+-- wobbly consumption
+def wob {U V} (wf : WobblyFn U V) (s : List U) : Option (V × List U) :=
+  match wf with
+  | WobblyFn.noWant v => some (v, s)
+  | WobblyFn.want f => match s with
+    | [] => none
+    | A :: t =>
+      match f A with
+      | none => none
+      | some v => some (v, t)
+
 
 -/
 
@@ -83,8 +61,23 @@ def Predet_Transition.stepTransition {Q: Type u_} {S: Type u_} {Γ: Type u_}
             | some wf_S_wΓ => some (wf_S_wΓ.fmap fun ⟨(), q⟩ => (AugmentEpsilon.Epsilon, q))
         )
         match pwβ.β with
-          | [] => valForUncondPop1_ pwβ.w f_Γ_wSq'
-          | A :: γ => valForUncondPop2_ A γ pwβ.w f_Γ_wSq'
+          | [] =>
+            f_Γ_wSq' AugmentZ0.z0 >>=
+              fun fwS => wob fwS pwβ.w >>=
+                fun ⟨ ⟨ α, q ⟩, x⟩  => some ⟨q, x, α.toList⟩
+          | A :: γ =>
+              f_Γ_wSq' (AugmentZ0.fromΓ A) >>=
+              fun wf => (
+                match wf with
+                | WobblyFn.noWant v => some (v, pwβ.w)
+                | WobblyFn.want f => match pwβ.w with
+                  | [] => none
+                  | A :: t =>
+                    match f A with
+                    | none => none
+                    | some v => some (v, t)
+                  ) >>=
+                fun ⟨ ⟨ α, q ⟩, x⟩ => some ⟨q, x, α.toList ++ γ⟩
     )
   fo.map fun idesc =>
   { p := idesc.p,
