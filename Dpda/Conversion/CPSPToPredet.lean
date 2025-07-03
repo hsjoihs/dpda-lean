@@ -170,3 +170,13 @@ def CPSP_DPDA.toPredet {Q S Γ}
             ⟩
           )
   ⟨ QExpand.originalQ M.q0, Finset.image QExpand.originalQ M.F, transition ⟩
+
+def CPSP_DPDA.send_idesc_toPredet {Q S Γ}
+  [Fintype Q] [Fintype S] [Fintype Γ]
+  [DecidableEq Q] [DecidableEq Γ] [DecidableEq S]
+  (M: CPSP_DPDA Q S Γ)
+  (idesc: CPSP_DPDA_IDesc Q S Γ) : Predet_DPDA_IDesc (M.expandedQ) S Γ :=
+  let p := idesc.p
+  let w := idesc.w
+  let β := idesc.β
+  ⟨ QExpand.originalQ p, w, β ⟩
