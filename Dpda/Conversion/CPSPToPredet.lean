@@ -74,9 +74,13 @@ def CPSP_DPDA.toPredet {Q S Γ} [Fintype Q] [Fintype S] [Fintype Γ] [DecidableE
       | some (α, qb) => some (QExpand.newQ ⟨ qa, qb, G, AugmentEpsilon.fromChar a, Fin.mk 0 sorry ⟩ )
       | _ => none
   | .newQ ⟨ qa, qb, G, s, j ⟩  =>
-    let maybe_alpha := M.str qa qb G s
-    match maybe_alpha with
+    match hα : M.str qa qb G s with
+    | none => by
+      /- I do not have an off-the-path state as a member of M.expandedQ -/
+      rw [hα] at j
+      exact j.elim0
     | some α =>
+      let hj := j.prop
       let n := α.length
       if j = n - 1
         then Predet_Judge.uncondPush (α.get (⟨ 0 , sorry ⟩ : Fin α.length), QExpand.originalQ qb)
@@ -87,8 +91,4 @@ def CPSP_DPDA.toPredet {Q S Γ} [Fintype Q] [Fintype S] [Fintype Γ] [DecidableE
               qa, qb, G, s, (⟨ j + 1, sorry ⟩ : Fin (match M.str qa qb G s with | none => 0 | some str => str.length) )
             ⟩
           )
-    | none => /-
-      ideally, I do not want to have such an off-the-path state as a member of M.expandedQ
-      However, it is included in the current definition. Hmm.
-    -/ sorry
   ⟨ sorry, sorry, transition ⟩
