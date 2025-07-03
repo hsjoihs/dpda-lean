@@ -57,17 +57,8 @@ def valForUncondPop2_ {Q: Type u_} {S: Type u_} {Γ: Type u_}
 
 /-
 
-def wobZ {Γ V} (wf : WobblyFn (AugmentZ0 Γ) V) (β : List Γ) : Option (V × List Γ) :=
-  match wf with
-  | WobblyFn.noWant v => some (v, β)
-  | WobblyFn.want f => match β with
-    | [] =>  match f AugmentZ0.z0 with
-      | none => none
-      | some v => some (v, [])
-    | A :: γ =>
-      match f (AugmentZ0.fromΓ A) with
-      | none => none
-      | some v => some (v, γ)
+def lambdaForObserveInput {Q: Type u_} {S: Type u_} {Γ: Type u_} (x : List S) : (AugmentEpsilon Γ × Q) × List Γ → Option (Le1P2_DPDA_IDesc Q S Γ)
+ := fun ⟨(α, q), γ⟩ => some ⟨q, x, α.toList ++ γ⟩
 
 -/
 
@@ -78,9 +69,7 @@ def Predet_Transition.stepTransition {Q: Type u_} {S: Type u_} {Γ: Type u_}
   let fo : Option (Le1P2_DPDA_IDesc Q S Γ) :=
     (
       match transition pwβ.p with
-      | Predet_Judge.uncondPush (γ, q) =>
-        let v := (AugmentEpsilon.fromChar γ, q)
-        some (v, pwβ.β) >>= lambdaForObserveInput pwβ.w
+      | Predet_Judge.uncondPush (γ, q) => some ⟨q, pwβ.w, γ :: pwβ.β⟩
       | Predet_Judge.popAndDecideWhetherToConsume f =>
         let f_Γ_wSq' : AugmentZ0 Γ → Option (WobblyFn S (AugmentEpsilon Γ × Q)) := (
           fun r =>
