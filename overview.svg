@@ -2,9 +2,9 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="719.85388mm"
-   height="273.68802mm"
-   viewBox="-120 0 719.85388 273.68802"
+   width="814.37134mm"
+   height="300.58322mm"
+   viewBox="-120 0 814.37134 300.58322"
    version="1.1"
    id="svg1"
    inkscape:version="1.2.2 (732a01da63, 2022-12-09)"
@@ -26,9 +26,9 @@
      inkscape:pagecheckerboard="1"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
-     inkscape:zoom="0.48693448"
-     inkscape:cx="1043.2615"
-     inkscape:cy="662.30676"
+     inkscape:zoom="0.34431467"
+     inkscape:cx="952.61697"
+     inkscape:cy="884.36545"
      inkscape:window-width="1920"
      inkscape:window-height="1001"
      inkscape:window-x="-9"
@@ -62,14 +62,15 @@
   <g
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
-     id="layer1">
+     id="layer1"
+     transform="translate(95.060822,26.895214)">
     <rect
        style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:2.16;stroke-dasharray:none;stroke-opacity:1"
        id="rect15"
-       width="719.85388"
-       height="273.68802"
-       x="-120.54336"
-       y="0" />
+       width="814.37134"
+       height="300.58322"
+       x="-215.06082"
+       y="-26.895214" />
     <text
        xml:space="preserve"
        style="font-size:14.1111px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#bb17e1;fill-opacity:1;stroke-width:0.264583"
@@ -290,39 +291,34 @@
        xml:space="preserve"
        style="font-size:14.1111px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#bb17e1;fill-opacity:1;stroke-width:0.264583"
        x="-0.41838944"
-       y="257.78165"
+       y="263.0733"
        id="text288"><tspan
          sodipodi:role="line"
          id="tspan286"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.1111px;font-family:Consolas;-inkscape-font-specification:Consolas;fill:#bb17e1;fill-opacity:1;stroke-width:0.264583"
          x="-0.41838944"
-         y="257.78165">Sipser_DPDA</tspan></text>
-    <g
-       id="g344"
-       transform="translate(-238.98521)"
-       style="stroke:#ff0000">
-      <path
-         style="fill:none;stroke:#ff0000;stroke-width:2.16029;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#ArrowWide)"
-         d="m 276.02944,191.7865 v 48.51119"
-         id="path338"
-         sodipodi:nodetypes="cc" />
-      <path
-         style="fill:none;stroke:#ff0000;stroke-width:2.16029;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#ArrowWide)"
-         d="m 287.14195,242.36532 v -48.5112"
-         id="path340"
-         sodipodi:nodetypes="cc" />
-    </g>
+         y="263.0733">Sipser_DPDA</tspan></text>
+    <path
+       style="fill:none;stroke:#ff0000;stroke-width:2.16029;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#ArrowWide)"
+       d="M 19.656538,-3.2816674 C -164.83451,-87.399425 -274.30413,200.21922 32.697307,245.73134"
+       id="path338"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;stroke:#ff0000;stroke-width:2.16029;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#ArrowWide)"
+       d="m 48.15674,242.36532 v -48.5112"
+       id="path340"
+       sodipodi:nodetypes="cc" />
     <text
        xml:space="preserve"
        style="font-size:17.6389px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#ff0000;fill-opacity:1;stroke-width:0.264583"
-       x="-19.901922"
-       y="219.68556"
+       x="-205.86311"
+       y="147.4527"
        id="text400"><tspan
          sodipodi:role="line"
          id="tspan398"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:17.6389px;font-family:Consolas;-inkscape-font-specification:Consolas;fill:#ff0000;fill-opacity:1;stroke-width:0.264583"
-         x="-19.901922"
-         y="219.68556">sorry</tspan></text>
+         x="-205.86311"
+         y="147.4527">sorry</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:17.6389px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#ff0000;fill-opacity:1;stroke-width:0.264583"
