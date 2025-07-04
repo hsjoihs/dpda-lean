@@ -148,35 +148,11 @@ def CPSP_DPDA.toPredet {Q S Γ}
           )
   ⟨ QExpand.originalQ M.q0, Finset.image QExpand.originalQ M.F, transition ⟩
 
-def CPSP_DPDA.send_idesc_toPredet {Q S Γ}
+def CPSP_DPDA_IDesc.toPredet {Q S Γ R}
   [Fintype Q] [Fintype S] [Fintype Γ]
   [DecidableEq Q] [DecidableEq Γ] [DecidableEq S]
-  (M: CPSP_DPDA Q S Γ)
-  (idesc: CPSP_DPDA_IDesc Q S Γ) : Predet_DPDA_IDesc (M.expandedQ) S Γ :=
+  (idesc: CPSP_DPDA_IDesc Q S Γ) : Predet_DPDA_IDesc (QExpand Q R) S Γ :=
   let p := idesc.p
   let w := idesc.w
   let β := idesc.β
   ⟨ QExpand.originalQ p, w, β ⟩
-
-theorem CPSP_single_step_corresponds_to_Predet_sequence {Q S Γ}
-  [Fintype Q] [DecidableEq Q] [Fintype S] [Fintype Γ] [DecidableEq Γ] [DecidableEq S]
-  (M: CPSP_DPDA Q S Γ) (idesc: CPSP_DPDA_IDesc Q S Γ) :
-  let M_predet := M.toPredet
-  let idesc_predet := M.send_idesc_toPredet idesc
-  let after_step : Option (CPSP_DPDA_IDesc Q S Γ) := CPSP_Judge.stepTransition M.transition idesc
-  let consumed_input_char : Option (AugmentEpsilon S) := CPSP_Judge.stepTransition_consumedInputChar M.transition idesc
-  let popped_stack_char : AugmentZ0 Γ := match idesc.β with
-    | [] => AugmentZ0.z0
-    | A :: γ => AugmentZ0.fromΓ A
-  let len : Nat := (
-    match after_step, consumed_input_char with
-    | some new_idesc, some input_char =>
-      match M.str idesc.p new_idesc.p popped_stack_char input_char with
-      | none => 0
-      | some str => str.length
-    | _, _ => 0
-  )
-  let after_lenplus1_steps_predet : Option (Predet_DPDA_IDesc (M.expandedQ) S Γ) :=
-    Nat.repeat (· >>= Predet_DPDA.stepTransition M_predet) (len + 1) idesc_predet
-  after_step.map M.send_idesc_toPredet = after_lenplus1_steps_predet := by
-  sorry
