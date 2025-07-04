@@ -156,43 +156,43 @@ def Predet_DPDA.toSipser {Q S Γ} [DecidableEq Q] (M: Predet_DPDA Q S Γ) : Sips
                 | AugmentEpsilon.fromChar _ => none /- A path of consumption should not exist -/
   let is_deterministic := by
     intro q a x
-    simp
+    simp only
     suffices h :
       exactly_one_some
         (sipser_delta_curried q (AugmentEpsilon.fromChar x) (AugmentEpsilon.fromChar a))
         (sipser_delta_curried q AugmentEpsilon.Epsilon (AugmentEpsilon.fromChar a))
         (sipser_delta_curried q (AugmentEpsilon.fromChar x) AugmentEpsilon.Epsilon)
         (sipser_delta_curried q AugmentEpsilon.Epsilon AugmentEpsilon.Epsilon) = true from h
-    simp [sipser_delta_curried]
+    simp only [sipser_delta_curried]
     match q with
     | AugmentOneState.qNeg1 => -- death trap state
-      simp [AugmentEpsilon.fromChar, AugmentEpsilon.Epsilon, exactly_one_some]
+      simp only [exactly_one_some]
     | AugmentOneState.fromQ p =>
       match h : dot_delta p with
       | Predet_Judge.uncondPush (α, q2) =>
-        simp [AugmentEpsilon.fromChar, AugmentEpsilon.Epsilon, h, exactly_one_some]
+        simp only [exactly_one_some, h]
       | Predet_Judge.popAndDecideWhetherToConsume fΓ_wS =>
-        simp [AugmentEpsilon.fromChar, AugmentEpsilon.Epsilon, h, exactly_one_some]
+        simp only [exactly_one_some, h]
         match h2 : fΓ_wS AugmentZ0.z0 with
         | some (Sum.inl q2) =>
-          simp [AugmentEpsilon.fromChar, AugmentEpsilon.Epsilon, exactly_one_some]
+          simp only
         | some (Sum.inr f2) =>
-          simp [AugmentEpsilon.fromChar, AugmentEpsilon.Epsilon, h, h2, exactly_one_some]
+          simp only
           match h3 : f2 a with
-          | some q => simp
-          | none => simp
+          | some q => simp only
+          | none => simp only
         | none =>
-          simp [AugmentEpsilon.fromChar, AugmentEpsilon.Epsilon, exactly_one_some]
+          simp only
           match fΓ_wS (AugmentZ0.fromΓ x) with
           | some (Sum.inl q2) =>
-            simp [AugmentEpsilon.fromChar, AugmentEpsilon.Epsilon, exactly_one_some]
+            simp only
           | some (Sum.inr f2) =>
-            simp [AugmentEpsilon.fromChar, AugmentEpsilon.Epsilon, exactly_one_some]
+            simp only
             match h3 : f2 a with
-            | some q => simp
-            | none => simp
+            | some q => simp only
+            | none => simp only
           | none =>
-            simp [AugmentEpsilon.fromChar, AugmentEpsilon.Epsilon, exactly_one_some]
+            simp only
   ⟨
     ⟨
     AugmentOneState.fromQ q0,
