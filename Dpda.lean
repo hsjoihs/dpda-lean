@@ -29,6 +29,9 @@ import Dpda.Conversion.PP2ToLe1P2
 import Dpda.Conversion.Le1P2ToCPSP
 import Dpda.Conversion.CPSPToPredet
 
+
 -- Out-of-cycle conversions
 import Dpda.Conversion.CPSPToHopcroft
 import Dpda.Conversion.HopcroftToCPSP
+
+import Dpda.Conversion.Le1P2ToSipser
