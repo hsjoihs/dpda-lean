@@ -3,7 +3,7 @@ Formulating DPDAs (deterministic push-down automata) following the principles of
 
 ## Abstract
 
-This repository serves as the formal proof of the LaTeX summary available here: https://www.overleaf.com/project/65b4903d4d2168e01882cbfa
+This repository serves as the formal proof of the LaTeX summary available here: https://www.overleaf.com/read/pyhzshbsmttm#6e8cb8
 
 [A TypeScript version](https://github.com/hsjoihs/various-DPDA-formulations-ts) is also available.
 
