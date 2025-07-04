@@ -23,7 +23,7 @@ def CPSP_DPDA.str {Q S Γ} [Fintype Q] [Fintype S] [Fintype Γ] [DecidableEq Q] 
       | none => none
       | some (α, q) => if q = qb then some α else none
 
-inductive QExpand (Q: Type) (R: Type) where
+inductive QExpand (Q R : Type*) where
   | originalQ : Q → QExpand Q R
   | newQ : R → QExpand Q R
 deriving DecidableEq
@@ -38,8 +38,7 @@ instance {Q R} [Fintype Q] [Fintype R] [DecidableEq Q] [DecidableEq R] : Fintype
     | originalQ q => left; use q; simp
     | newQ r => right; use r; simp
 
-def CPSP_DPDA.expandedQ {Q S Γ} [Fintype Q] [Fintype S] [Fintype Γ] [DecidableEq Q]
-  (M: CPSP_DPDA Q S Γ) : Type
+def CPSP_DPDA.expandedQ {Q S Γ} [Fintype Q] [Fintype S] [Fintype Γ] [DecidableEq Q] (M: CPSP_DPDA Q S Γ)
   := QExpand Q <|
     (qa : Q) ×
     (qb : Q) ×
