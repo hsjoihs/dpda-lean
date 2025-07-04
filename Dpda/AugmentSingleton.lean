@@ -31,7 +31,7 @@ def augmentZ0_option_equiv {Γ} : AugmentZ0 Γ ≃ Option Γ :=
 instance AugmentZ0.fintype {Γ} [ft : Fintype Γ]: Fintype (AugmentZ0 Γ) := equiv_fintype augmentZ0_option_equiv.symm
 
 
-inductive AugmentOneState Q
+inductive AugmentOneState (Q: Type u) where
   | fromQ : Q → AugmentOneState Q
   | qNeg1 : AugmentOneState Q
 deriving DecidableEq

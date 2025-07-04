@@ -34,4 +34,4 @@ import Dpda.Conversion.CPSPToPredet
 import Dpda.Conversion.CPSPToHopcroft
 import Dpda.Conversion.HopcroftToCPSP
 
-import Dpda.Conversion.Le1P2ToSipser
+import Dpda.Conversion.PredetToSipser
