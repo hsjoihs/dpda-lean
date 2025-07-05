@@ -218,5 +218,5 @@ theorem Predet_to_Sipser_preserves_semantics_single_step {Q S Γ}
   match h : M.transition idesc.p with
   | Predet_Judge.uncondPush (α, q) =>
     simp [Predet_DPDA_IDesc.toSipser, Predet_DPDA.toSipser, Predet_DPDA.stepTransition, Sipser_DPDA.stepTransition]
-    rw [h]
+    rw [h] -- This is where I got `motive is not type correct`
   | Predet_Judge.popAndDecideWhetherToConsume fΓ_wS => sorry
