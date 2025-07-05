@@ -36,11 +36,8 @@ theorem Hopcroft_to_CPSP_preserves_semantics_if_transition_is_immediate {Q S Γ}
   [Fintype Q] [DecidableEq Q] [Fintype S] [Fintype Γ] [DecidableEq Γ]
   (M: Hopcroft_DPDA Q S Γ) (idesc: Hopcroft_DPDA_IDesc Q S Γ)
   (stack_nonempty_and_transition_immediate: ∃ A γ, idesc.β = A :: γ ∧ ∃ a, M.Δ (idesc.p, A) = CPSP_Judge.immediate a) :
-  let M_cpsp : CPSP_DPDA (AugmentOneState Q) S Γ := Hopcroft_DPDA.toCPSP M
-  let idesc_cpsp := Hopcroft_DPDA_IDesc.toCPSP idesc
-  let after_step : Option (Hopcroft_DPDA_IDesc Q S Γ) := Hopcroft_DPDA.stepTransition M idesc
-  let after_step_cpsp : Option (CPSP_DPDA_IDesc (AugmentOneState Q) S Γ) := CPSP_Transition.stepTransition M_cpsp.transition idesc_cpsp
-  after_step.map Hopcroft_DPDA_IDesc.toCPSP = after_step_cpsp := by
+  Hopcroft_DPDA_IDesc.toCPSP <$> M.stepTransition idesc = M.toCPSP.transition.stepTransition idesc.toCPSP := by
+  simp only [Functor.map]
   simp only [
     Hopcroft_DPDA_IDesc.toCPSP,
     Hopcroft_DPDA.toCPSP,
@@ -198,11 +195,8 @@ lemma pair_eq {A} {B} {a: A} {b : B} {val} (h:  (a, b) = val) : b = val.2 ∧ a 
 theorem Hopcroft_to_CPSP_preserves_semantics_single_step {Q S Γ}
   [Fintype Q] [DecidableEq Q] [Fintype S] [Fintype Γ] [DecidableEq Γ]
   (M: Hopcroft_DPDA Q S Γ) (idesc: Hopcroft_DPDA_IDesc Q S Γ) :
-  let M_cpsp : CPSP_DPDA (AugmentOneState Q) S Γ := Hopcroft_DPDA.toCPSP M
-  let idesc_cpsp := Hopcroft_DPDA_IDesc.toCPSP idesc
-  let after_step : Option (Hopcroft_DPDA_IDesc Q S Γ) := Hopcroft_DPDA.stepTransition M idesc
-  let after_step_cpsp : Option (CPSP_DPDA_IDesc (AugmentOneState Q) S Γ) := CPSP_Transition.stepTransition M_cpsp.transition idesc_cpsp
-  after_step.map Hopcroft_DPDA_IDesc.toCPSP = after_step_cpsp := by
+  Hopcroft_DPDA_IDesc.toCPSP <$> M.stepTransition idesc = M.toCPSP.transition.stepTransition idesc.toCPSP := by
+  simp only [Functor.map]
   cases h : idesc.β with
   | nil =>
     simp only [
@@ -212,7 +206,6 @@ theorem Hopcroft_to_CPSP_preserves_semantics_single_step {Q S Γ}
       Hopcroft_DPDA.toCPSP
     ] /- However, this case is absurd under our assumption -/
   | cons A γ =>
-    simp only
     cases h2 : M.Δ (idesc.p, A) with
     | immediate a =>
       have hs : (∃ A γ, idesc.β = A :: γ ∧ ∃ a, M.Δ (idesc.p, A) = CPSP_Judge.immediate a) := by
