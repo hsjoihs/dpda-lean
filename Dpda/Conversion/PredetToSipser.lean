@@ -3,6 +3,11 @@ import Dpda.Definition.PredeterminedToPushOrPop
 
 universe u_
 
+def Predet_DPDA_IDesc.toSipser {Q S Γ} [DecidableEq Q] (M: Predet_DPDA_IDesc Q S Γ) : Sipser_DPDA_IDesc (AugmentOneState Q) S Γ :=
+  let ⟨ p, w, β ⟩ := M
+  ⟨ AugmentOneState.fromQ p, w, β ⟩
+
+
 -- The augmented state is the "death trap" state.
 -- Since the only way for a Sipser DPDA to fail in a finite amount of time is to pop the stack when it is empty,
 -- we add a "death trap" as the following state:
@@ -201,3 +206,8 @@ def Predet_DPDA.toSipser {Q S Γ} [DecidableEq Q] (M: Predet_DPDA Q S Γ) : Sips
     ⟩,
     is_deterministic
   ⟩
+
+theorem Predet_to_Sipser_preserves_semantics_single_step {Q S Γ}
+  [Fintype Q] [DecidableEq Q] [Fintype S] [Fintype Γ] [DecidableEq Γ]
+  (M: Predet_DPDA Q S Γ) (idesc: Predet_DPDA_IDesc Q S Γ) :
+  Predet_DPDA_IDesc.toSipser <$> M.stepTransition idesc = M.toSipser.stepTransition idesc.toSipser := by sorry
