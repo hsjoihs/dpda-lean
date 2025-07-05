@@ -194,13 +194,3 @@ def Sipser_DPDA.stepTransition {Q S Γ}
       | some _, none, some _   => False.elim <| by have h3 := M.deterministic pwβ.p a x; simp [exactly_one_some, hεε, hax, haε, hεx] at h3
       | none, some _, some _   => False.elim <| by have h3 := M.deterministic pwβ.p a x; simp [exactly_one_some, hεε, hax, haε, hεx] at h3
       | none, none, none       => False.elim <| by have h3 := M.deterministic pwβ.p a x; simp [exactly_one_some, hεε, hax, haε, hεx] at h3
-
-
-theorem step_in_pre_is_step_in_dpda {Q S Γ}
-  (M: Sipser_DPDA Q S Γ)
-  (idesc: Sipser_DPDA_IDesc Q S Γ) :
-  Sipser_PreDPDA.stepTransition M.pda idesc = M.stepTransition idesc := by
-  simp only [Sipser_PreDPDA.stepTransition, Sipser_DPDA.stepTransition]
-  match h2 : M.pda.transition (idesc.p, AugmentEpsilon.Epsilon, AugmentEpsilon.Epsilon) with
-  | some (r, y) => sorry
-  | none => sorry
