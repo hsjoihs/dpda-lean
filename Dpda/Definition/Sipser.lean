@@ -59,30 +59,30 @@ def Sipser_PreDPDA.stepTransition {Q S Γ}
 
 def Sipser_DPDA.stepTransition {Q S Γ}
   (M: Sipser_DPDA Q S Γ)
-  (pwβ: Sipser_DPDA_IDesc Q S Γ)
+  (idesc: Sipser_DPDA_IDesc Q S Γ)
   : Option (Sipser_DPDA_IDesc Q S Γ) :=
-  match hεε : M.pda.transition (pwβ.current_state, none, none) with
-  | some (r, y) => some ⟨ r, pwβ.remaining_input, y.toList ++ pwβ.stack ⟩
-  | none => match pwβ.remaining_input, pwβ.stack with
+  match hεε : M.pda.transition (idesc.current_state, none, none) with
+  | some (r, y) => some ⟨ r, idesc.remaining_input, y.toList ++ idesc.stack ⟩
+  | none => match idesc.remaining_input, idesc.stack with
     | [], [] => none
-    | [], x :: xs => match h2 : M.pda.transition (pwβ.current_state, none, some x) with
-      | some (r, y) => some ⟨ r, pwβ.remaining_input, y.toList ++ xs ⟩
+    | [], x :: xs => match h2 : M.pda.transition (idesc.current_state, none, some x) with
+      | some (r, y) => some ⟨ r, idesc.remaining_input, y.toList ++ xs ⟩
       | none => none
-    | a :: ws, [] => match h2 : M.pda.transition (pwβ.current_state, some a, none) with
-      | some (r, y) => some ⟨ r, ws, y.toList ++ pwβ.stack ⟩
+    | a :: ws, [] => match h2 : M.pda.transition (idesc.current_state, some a, none) with
+      | some (r, y) => some ⟨ r, ws, y.toList ++ idesc.stack ⟩
       | none => none
     | a :: ws, x :: xs => match
-        hax : (M.pda.transition (pwβ.current_state, some a, some x)),
-        haε : (M.pda.transition (pwβ.current_state, some a, none)),
-        hεx : (M.pda.transition (pwβ.current_state, none, some x)) with
+        hax : (M.pda.transition (idesc.current_state, some a, some x)),
+        haε : (M.pda.transition (idesc.current_state, some a, none)),
+        hεx : (M.pda.transition (idesc.current_state, none, some x)) with
       | some (r, y), none, none => some ⟨ r, ws, y.toList ++ xs ⟩
-      | none, some (r, y), none => some ⟨ r, pwβ.remaining_input, y.toList ++ xs ⟩
-      | none, none, some (r, y) => some ⟨ r, ws, y.toList ++ pwβ.stack ⟩
-      | some _, some _, some _ => False.elim <| by have h3 := M.deterministic pwβ.current_state a x; simp [exactly_one_some, hεε, hax, haε, hεx] at h3
-      | some _, some _, none   => False.elim <| by have h3 := M.deterministic pwβ.current_state a x; simp [exactly_one_some, hεε, hax, haε, hεx] at h3
-      | some _, none, some _   => False.elim <| by have h3 := M.deterministic pwβ.current_state a x; simp [exactly_one_some, hεε, hax, haε, hεx] at h3
-      | none, some _, some _   => False.elim <| by have h3 := M.deterministic pwβ.current_state a x; simp [exactly_one_some, hεε, hax, haε, hεx] at h3
-      | none, none, none       => False.elim <| by have h3 := M.deterministic pwβ.current_state a x; simp [exactly_one_some, hεε, hax, haε, hεx] at h3
+      | none, some (r, y), none => some ⟨ r, idesc.remaining_input, y.toList ++ xs ⟩
+      | none, none, some (r, y) => some ⟨ r, ws, y.toList ++ idesc.stack ⟩
+      | some _, some _, some _ => False.elim <| by have h3 := M.deterministic idesc.current_state a x; simp [exactly_one_some, hεε, hax, haε, hεx] at h3
+      | some _, some _, none   => False.elim <| by have h3 := M.deterministic idesc.current_state a x; simp [exactly_one_some, hεε, hax, haε, hεx] at h3
+      | some _, none, some _   => False.elim <| by have h3 := M.deterministic idesc.current_state a x; simp [exactly_one_some, hεε, hax, haε, hεx] at h3
+      | none, some _, some _   => False.elim <| by have h3 := M.deterministic idesc.current_state a x; simp [exactly_one_some, hεε, hax, haε, hεx] at h3
+      | none, none, none       => False.elim <| by have h3 := M.deterministic idesc.current_state a x; simp [exactly_one_some, hεε, hax, haε, hεx] at h3
 
 
 theorem step_in_pre_is_step_in_dpda {Q S Γ}
