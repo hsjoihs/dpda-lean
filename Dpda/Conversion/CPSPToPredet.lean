@@ -151,7 +151,5 @@ def CPSP_DPDA_IDesc.toPredet {Q S Γ R}
   [Fintype Q] [Fintype S] [Fintype Γ]
   [DecidableEq Q] [DecidableEq Γ] [DecidableEq S]
   (idesc: CPSP_DPDA_IDesc Q S Γ) : Predet_DPDA_IDesc (QExpand Q R) S Γ :=
-  let p := idesc.p
-  let w := idesc.w
-  let β := idesc.β
+  let ⟨ p, w, β ⟩ := idesc
   ⟨ QExpand.originalQ p, w, β ⟩

@@ -47,7 +47,7 @@ def valForUncondPop2 {Q: Type u_} {S: Type u_} {Γ: Type u_}
     fun fwS => wob fwS w >>=
       fun ⟨ ⟨ α, q ⟩, x⟩  => some ⟨q, x, α.toList ++ γ⟩
 
-def Le1P2_Judge.stepTransition {Q: Type u_} {S: Type u_} {Γ: Type u_}
+def Le1P2_Transition.stepTransition {Q: Type u_} {S: Type u_} {Γ: Type u_}
   (hat_delta: Le1P2_Transition Q S Γ)
   (pwβ: Le1P2_DPDA_IDesc Q S Γ)
   : Option (Le1P2_DPDA_IDesc Q S Γ) :=

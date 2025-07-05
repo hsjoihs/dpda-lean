@@ -39,13 +39,13 @@ theorem Hopcroft_to_CPSP_preserves_semantics_if_transition_is_immediate {Q S Γ}
   let M_cpsp : CPSP_DPDA (AugmentOneState Q) S Γ := Hopcroft_DPDA.toCPSP M
   let idesc_cpsp := Hopcroft_DPDA_IDesc.toCPSP idesc
   let after_step : Option (Hopcroft_DPDA_IDesc Q S Γ) := Hopcroft_DPDA.stepTransition M idesc
-  let after_step_cpsp : Option (CPSP_DPDA_IDesc (AugmentOneState Q) S Γ) := CPSP_Judge.stepTransition M_cpsp.transition idesc_cpsp
+  let after_step_cpsp : Option (CPSP_DPDA_IDesc (AugmentOneState Q) S Γ) := CPSP_Transition.stepTransition M_cpsp.transition idesc_cpsp
   after_step.map Hopcroft_DPDA_IDesc.toCPSP = after_step_cpsp := by
   simp only [
     Hopcroft_DPDA_IDesc.toCPSP,
     Hopcroft_DPDA.toCPSP,
     Hopcroft_DPDA.stepTransition,
-    CPSP_Judge.stepTransition
+    CPSP_Transition.stepTransition
   ]
   cases h : idesc.β with
   | nil => simp only [Option.map_none] /- However, this case is absurd under our assumption -/
@@ -201,13 +201,13 @@ theorem Hopcroft_to_CPSP_preserves_semantics_single_step {Q S Γ}
   let M_cpsp : CPSP_DPDA (AugmentOneState Q) S Γ := Hopcroft_DPDA.toCPSP M
   let idesc_cpsp := Hopcroft_DPDA_IDesc.toCPSP idesc
   let after_step : Option (Hopcroft_DPDA_IDesc Q S Γ) := Hopcroft_DPDA.stepTransition M idesc
-  let after_step_cpsp : Option (CPSP_DPDA_IDesc (AugmentOneState Q) S Γ) := CPSP_Judge.stepTransition M_cpsp.transition idesc_cpsp
+  let after_step_cpsp : Option (CPSP_DPDA_IDesc (AugmentOneState Q) S Γ) := CPSP_Transition.stepTransition M_cpsp.transition idesc_cpsp
   after_step.map Hopcroft_DPDA_IDesc.toCPSP = after_step_cpsp := by
   cases h : idesc.β with
   | nil =>
     simp only [
       Hopcroft_DPDA.stepTransition, h, Option.map_none,
-      CPSP_Judge.stepTransition,
+      CPSP_Transition.stepTransition,
       Hopcroft_DPDA_IDesc.toCPSP,
       Hopcroft_DPDA.toCPSP
     ] /- However, this case is absurd under our assumption -/
@@ -224,7 +224,7 @@ theorem Hopcroft_to_CPSP_preserves_semantics_single_step {Q S Γ}
       have h3 := Hopcroft_to_CPSP_preserves_semantics_if_transition_is_immediate M idesc hs
       apply h3
     | step f =>
-      simp only [Hopcroft_DPDA.stepTransition, h, CPSP_Judge.stepTransition,
+      simp only [Hopcroft_DPDA.stepTransition, h, CPSP_Transition.stepTransition,
         Hopcroft_DPDA_IDesc.toCPSP, Hopcroft_DPDA.toCPSP, h2]
       cases h3 : idesc.w with
       | nil =>
@@ -321,11 +321,11 @@ theorem Hopcroft_to_CPSP_preserves_semantics {Q S Γ} [Fintype Q] [DecidableEq Q
     have h := repeat_bind_map2 α β
       Hopcroft_DPDA_IDesc.toCPSP
       (Hopcroft_DPDA.stepTransition M)
-      (CPSP_Judge.stepTransition (Hopcroft_DPDA.toCPSP M).transition)
+      (CPSP_Transition.stepTransition (Hopcroft_DPDA.toCPSP M).transition)
       (Hopcroft_to_CPSP_preserves_semantics_single_step M)
       n
     simp only at h
-    set k := some { p := M.toCPSP.q0, w := w, β := [] } >>= CPSP_Judge.stepTransition M.toCPSP.transition with hk2
+    set k := some { p := M.toCPSP.q0, w := w, β := [] } >>= CPSP_Transition.stepTransition M.toCPSP.transition with hk2
     by_cases hk: ∃ a, (pure (Hopcroft_DPDA_IDesc.toCPSP a) = k)
     · obtain ⟨ a, hk ⟩ := hk
       have ha := h a
@@ -335,7 +335,7 @@ theorem Hopcroft_to_CPSP_preserves_semantics {Q S Γ} [Fintype Q] [DecidableEq Q
       | some ⟨p2, w2, β2⟩ =>
         simp only [Hopcroft_DPDA_IDesc.toCPSP, Hopcroft_DPDA.toCPSP]
         rw [hk2] at hk
-        simp only [Hopcroft_DPDA_IDesc.toCPSP, CPSP_Judge.stepTransition,
+        simp only [Hopcroft_DPDA_IDesc.toCPSP, CPSP_Transition.stepTransition,
           Hopcroft_DPDA.toCPSP, Option.some.injEq, CPSP_DPDA_IDesc.mk.injEq,
           AugmentOneState.fromQ.injEq, some_bind, Option.pure_def, Option.some.injEq, imp_self] at hk
         obtain ⟨ hp, hw, hβ ⟩ := hk
@@ -352,7 +352,7 @@ theorem Hopcroft_to_CPSP_preserves_semantics {Q S Γ} [Fintype Q] [DecidableEq Q
       | none =>
         simp only [Hopcroft_DPDA_IDesc.toCPSP, Hopcroft_DPDA.toCPSP]
         rw [hk2] at hk
-        simp only [Hopcroft_DPDA_IDesc.toCPSP, CPSP_Judge.stepTransition,
+        simp only [Hopcroft_DPDA_IDesc.toCPSP, CPSP_Transition.stepTransition,
           Hopcroft_DPDA.toCPSP, Option.some.injEq, CPSP_DPDA_IDesc.mk.injEq,
           AugmentOneState.fromQ.injEq, some_bind, Option.pure_def, Option.some.injEq, imp_self] at hk
         obtain ⟨ hp, hw, hβ ⟩ := hk
@@ -362,7 +362,7 @@ theorem Hopcroft_to_CPSP_preserves_semantics {Q S Γ} [Fintype Q] [DecidableEq Q
         rw [h2]
         simp only [Option.map_eq_map, Option.map_none]
     · rw [hk2] at hk
-      simp only [Hopcroft_DPDA_IDesc.toCPSP, Hopcroft_DPDA.toCPSP, CPSP_Judge.stepTransition, Option.pure_def, Option.some.injEq, imp_self, some_bind] at hk
+      simp only [Hopcroft_DPDA_IDesc.toCPSP, Hopcroft_DPDA.toCPSP, CPSP_Transition.stepTransition, Option.pure_def, Option.some.injEq, imp_self, some_bind] at hk
       push_neg at hk
       have h3 := hk ⟨ M.pda.q0,  w,  [M.pda.z0] ⟩
       contrapose! h3

@@ -36,7 +36,7 @@ structure CPSP_DPDA_IDesc(Q S Γ) where
 abbrev CPSP_Transition Q S Γ :=
   Q × (AugmentZ0 Γ) → CPSP_Judge Q S Γ
 
-def CPSP_Judge.stepTransition {Q S Γ}
+def CPSP_Transition.stepTransition {Q S Γ}
   (tilde_delta: CPSP_Transition Q S Γ)
   (pwβ: CPSP_DPDA_IDesc Q S Γ)
   : Option (CPSP_DPDA_IDesc Q S Γ) :=
@@ -59,7 +59,7 @@ def CPSP_Judge.stepTransition {Q S Γ}
         | some (α, q) => some ⟨q, x, α ++ γ⟩
 
 
-def CPSP_Judge.stepTransition_consumedInputChar {Q S Γ}
+def CPSP_Transition.stepTransition_consumedInputChar {Q S Γ}
   (tilde_delta: CPSP_Transition Q S Γ)
   (pwβ: CPSP_DPDA_IDesc Q S Γ)
   : Option (AugmentEpsilon S) :=
@@ -88,7 +88,7 @@ structure CPSP_DPDA (Q S Γ) where
 
 def CPSP_DPDA.run_n_steps {Q S Γ} [Fintype Q] [DecidableEq Q] [Fintype S /- Σ -/] [Fintype Γ]
   (M: CPSP_DPDA Q S Γ) (w: List S) (n: ℕ) : Option (CPSP_DPDA_IDesc Q S Γ) :=
-  let step : CPSP_DPDA_IDesc Q S Γ -> Option (CPSP_DPDA_IDesc Q S Γ) := CPSP_Judge.stepTransition M.transition
+  let step : CPSP_DPDA_IDesc Q S Γ -> Option (CPSP_DPDA_IDesc Q S Γ) := CPSP_Transition.stepTransition M.transition
   Nat.repeat (· >>= step) n (some ⟨M.q0, w, []⟩)
 
 def CPSP_DPDA.membership_provable_in_n_steps {Q S Γ} [Fintype Q] [DecidableEq Q] [Fintype S /- Σ -/] [Fintype Γ]
