@@ -4,16 +4,11 @@ import Mathlib.Data.Fintype.Basic
 import Mathlib.Data.Fintype.Prod
 import Mathlib.Data.Fintype.Option
 
-
-
 universe u_
-
-abbrev PADWTC (Q: Type u_) (S: Type u_) (Γ: Type u_) :=
-  Option Γ → Option (Q ⊕ (S → Option Q))
 
 inductive Predet_Judge (Q: Type u_) (S: Type u_) (Γ: Type u_)
   | uncondPush : (Γ × Q) → Predet_Judge Q S Γ
-  | popAndDecideWhetherToConsume : PADWTC Q S Γ → Predet_Judge Q S Γ
+  | popAndDecideWhetherToConsume : (Option Γ → Option (Q ⊕ (S → Option Q))) → Predet_Judge Q S Γ
 
 abbrev Predet_Transition (Q: Type u_) (S: Type u_) (Γ: Type u_) :=
   Q → Predet_Judge Q S Γ
@@ -188,55 +183,13 @@ def Predet_DPDA.toSipser {Q S Γ} [DecidableEq Q] (M: Predet_DPDA Q S Γ) : Sips
   let ⟨ q0, F, dot_delta ⟩ := M
   let sipser_delta_curried : (Option Q) → Option Γ → Option S → Option (Option Q × Option Γ) :=
     fun p_ => match p_ with
-     | none => /- death trap -/
-        /- Should always pop any stack alphabet, without consuming the input.
-
-                             δ(qNeg1, ε, ε) = none
-                   ∀ G : Γ,  δ(qNeg1, ε, G) = some (qNeg1, ε)
-          ∀ a : S, ∀ G : Γ,  δ(qNeg1, a, G) = none
-          ∀ a : S,           δ(qNeg1, a, ε) = none
-         -/
-       fun stack_consumption input_consumption => match input_consumption, stack_consumption with
-        | none, some _ =>
-          -- pop the stack and stay in the death trap state
-            some (none, none)
-        | _, _ => none
-          -- we do not want any other path that consumes the input
+     | none => sorry
 
      | some p =>
        match dot_delta p with
-        | Predet_Judge.uncondPush (α, q) =>
-          -- unconditional push
-          -- a non-consuming, non-popping transition that pushes α onto the stack
-          /-                 δ(p, ε, ε) = some (q, α)
-          ∀ a : S,           δ(p, a, ε) = none
-                   ∀ G : Γ,  δ(p, ε, G) = none
-          ∀ a : S, ∀ G : Γ,  δ(p, a, G) = none
-         -/
-         fun stack_consumption input_consumption => match input_consumption, stack_consumption with
-          | none, none => some (some q, some α)
-          | _, _ => none
+        | Predet_Judge.uncondPush (α, q) => sorry
         | Predet_Judge.popAndDecideWhetherToConsume fΓ_wS =>
-          /- The function `fΓ_wS : Option Γ → Option (Q ⊕ (S → Option Q))` encodes two pieces of information:
-            · When applied to .z0, it corresponds to a non-popping transition.
-            · When applied to .fromΓ A, it corresponds to a popping transition.
 
-            We need to carefully unpack this and translate it to the Sipser format.
-            The "exactly one" condition in Sipser is so difficult to get right.
-
-            So far we have been sifting through the cases by only looking at `p`, the current state.
-            Therefore, for each state `p` that arrived at the current code path
-             (`Predet_Judge.popAndDecideWhetherToConsume fΓ_wS`), we need to make sure that
-
-            ∀ a x,
-                exactly_one_some
-                  (pda.transition (p, some a, some x))
-                  (pda.transition (p, some a, none))
-                  (pda.transition (p, none, some x))
-                  (pda.transition (p, none, none))
-
-
-          -/
           let nonpop : Option (Q ⊕ (S → Option Q)) := fΓ_wS none
           match nonpop with
           | some (Sum.inl q) =>
@@ -289,86 +242,8 @@ def Predet_DPDA.toSipser {Q S Γ} [DecidableEq Q] (M: Predet_DPDA Q S Γ) : Sips
             | none =>
               fun input_consumption => none -- the non-popping path is definitely not populated
 
-            | some x =>
-              let pop : Option (Q ⊕ (S → Option Q)) := fΓ_wS (some x)
-              /-
-
-              So far, we have guaranteed
-
-              ∀ a,
-                    (pda.transition (p, some a, none)) == none
-                  ∧ (pda.transition (p, none, none)) == none
-
-              Thus we are now left with
-
-              ∀ a x,
-                  exactly_one_some
-                    (pda.transition (p, some a, some x))
-                    (pda.transition (p, none, some x))
-              -/
-              match pop with
-              | some (Sum.inl q) =>
-                -- The machine popped the stack, got `x`, and moved to `q`, without consuming the input.
-                fun input_consumption => match input_consumption with
-                | some _ => none /- A path of consumption should not exist -/
-                | none => some (some q, none)
-              | some (Sum.inr (f2 : S → Option Q)) =>
-                -- The machine popped the stack, got `x`, and decided to consume the input
-                fun input_consumption => match input_consumption with
-                | none => none /- Epsilon transition should not exist -/
-                | some a => match f2 a with
-                  | some q => some (some q, some x)
-                  | none =>
-                    /-
-                      Raises an error in the original machine.
-                      Since in Sipser we need to populate this, I implement this as a transition to the death trap state.
-                    -/
-                    some (none, none)
-              | none =>
-                -- The machine popped the stack, got `x`, and decided to raise an error.
-                -- Since in Sipser we need to populate this, I implement this as an epsilon transition to the death trap state.
-                fun input_consumption => match input_consumption with
-                | none => some (none, none)
-                | some _ => none /- A path of consumption should not exist -/
-  let is_deterministic := by
-    intro q a x
-    simp only
-    suffices h :
-      exactly_one_some
-        (sipser_delta_curried q (some x) (some a))
-        (sipser_delta_curried q none (some a))
-        (sipser_delta_curried q (some x) none)
-        (sipser_delta_curried q none none) = true from h
-    simp only [sipser_delta_curried]
-    match q with
-    | none => -- death trap state
-      simp only [exactly_one_some]
-    | some p =>
-      match h : dot_delta p with
-      | Predet_Judge.uncondPush (α, q2) =>
-        simp only [exactly_one_some, h]
-      | Predet_Judge.popAndDecideWhetherToConsume fΓ_wS =>
-        simp only [exactly_one_some, h]
-        match h2 : fΓ_wS none with
-        | some (Sum.inl q2) =>
-          simp only
-        | some (Sum.inr f2) =>
-          simp only
-          match h3 : f2 a with
-          | some q => simp only
-          | none => simp only
-        | none =>
-          simp only
-          match fΓ_wS (some x) with
-          | some (Sum.inl q2) =>
-            simp only
-          | some (Sum.inr f2) =>
-            simp only
-            match h3 : f2 a with
-            | some q => simp only
-            | none => simp only
-          | none =>
-            simp only
+            | some x => sorry
+  let is_deterministic := sorry
   ⟨
     ⟨
     some q0,
