@@ -184,65 +184,10 @@ def Predet_DPDA.toSipser {Q S Γ} [DecidableEq Q] (M: Predet_DPDA Q S Γ) : Sips
   let sipser_delta_curried : (Option Q) → Option Γ → Option S → Option (Option Q × Option Γ) :=
     fun p_ => match p_ with
      | none => sorry
-
      | some p =>
        match dot_delta p with
         | Predet_Judge.uncondPush (α, q) => sorry
-        | Predet_Judge.popAndDecideWhetherToConsume fΓ_wS =>
-
-          let nonpop : Option (Q ⊕ (S → Option Q)) := fΓ_wS none
-          match nonpop with
-          | some (Sum.inl q) =>
-            -- the non-popping, non-consuming transition is populated
-            fun stack_consumption input_consumption => match input_consumption, stack_consumption with
-            | none, none => some (some q, none)
-            | _, _ => none
-          | some (Sum.inr (f2 : S → Option Q)) =>
-            -- the non-popping, consuming transition is populated
-            fun stack_consumption => match stack_consumption with
-            | some _ =>
-              fun input_consumption => none -- the popping path is definitely not populated
-
-            | none =>
-              /-
-
-              So far, we have guaranteed
-
-              ∀ a x,
-                  (pda.transition (p, some a, some x)) == none
-               ∧  (pda.transition (p, none, some x)) == none
-
-              Thus we are left with
-
-              ∀ a,
-                exactly_one_some
-                  (pda.transition (p, some a, none))
-                  (pda.transition (p, none, none))
-
-              To satisfy this, we populate
-               (pda.transition (p, some a, none))
-               for each `a` in `S`, and we set
-               (pda.transition (p, none, none)) to `none`.
-              -/
-              fun input_consumption => match input_consumption with
-              | none => none
-              | some a => match f2 a with
-                | some q => some (some q, none)
-                | none =>
-                  /-
-                    Raises an error in the original machine.
-                    Since in Sipser we need to populate this, I implement this as a transition to the death trap state.
-                  -/
-                  some (none, none)
-          | none =>
-            -- The non-popping is unpopulated
-            -- Thus we need to populate the popping transition
-
-            fun stack_consumption => match stack_consumption with
-            | none =>
-              fun input_consumption => none -- the non-popping path is definitely not populated
-
-            | some x => sorry
+        | Predet_Judge.popAndDecideWhetherToConsume fΓ_wS => sorry
   let is_deterministic := sorry
   ⟨
     ⟨
@@ -257,10 +202,7 @@ theorem Predet_to_Sipser_preserves_semantics_single_step {Q S Γ}
   [Fintype Q] [DecidableEq Q] [Fintype S] [Fintype Γ] [DecidableEq Γ]
   (M: Predet_DPDA Q S Γ) (idesc: Predet_DPDA_IDesc Q S Γ) :
   Predet_DPDA_IDesc.toSipser <$> M.stepTransition idesc = M.toSipser.stepTransition idesc.toSipser := by
-  simp [Functor.map,
-  -- Predet_DPDA_IDesc.toSipser,     Predet_DPDA.toSipser,
-  -- Predet_DPDA.stepTransition, Sipser_DPDA.stepTransition,
-  ]
+  simp [Functor.map]
   match h : M.transition idesc.p with
   | Predet_Judge.uncondPush (α, q) =>
     simp [Predet_DPDA_IDesc.toSipser, Predet_DPDA.toSipser, Predet_DPDA.stepTransition, Sipser_DPDA.stepTransition]
