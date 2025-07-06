@@ -210,4 +210,22 @@ def Predet_DPDA.toSipser {Q S Γ} [DecidableEq Q] (M: Predet_DPDA Q S Γ) : Sips
 theorem Predet_to_Sipser_preserves_semantics_single_step {Q S Γ}
   [Fintype Q] [DecidableEq Q] [Fintype S] [Fintype Γ] [DecidableEq Γ]
   (M: Predet_DPDA Q S Γ) (idesc: Predet_DPDA_IDesc Q S Γ) :
-  Predet_DPDA_IDesc.toSipser <$> M.stepTransition idesc = M.toSipser.stepTransition idesc.toSipser := by sorry
+  Predet_DPDA_IDesc.toSipser <$> M.stepTransition idesc = M.toSipser.stepTransition idesc.toSipser := by
+  simp [Functor.map,
+  -- Predet_DPDA_IDesc.toSipser,     Predet_DPDA.toSipser,
+  -- Predet_DPDA.stepTransition, Sipser_DPDA.stepTransition,
+  ]
+  match h : M.transition idesc.p with
+  | Predet_Judge.uncondPush (α, q) =>
+    simp [Predet_DPDA_IDesc.toSipser, Predet_DPDA.toSipser, Predet_DPDA.stepTransition, Sipser_DPDA.stepTransition]
+    fun_cases Sipser_DPDA.stepTransition M.toSipser idesc.toSipser
+    · sorry
+    · sorry
+    · sorry
+    · sorry
+    · sorry
+    · sorry
+    · sorry
+    · sorry
+    · sorry
+  | Predet_Judge.popAndDecideWhetherToConsume fΓ_wS => sorry
