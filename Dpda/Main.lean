@@ -1,23 +1,15 @@
 universe u_
 
-abbrev Predet_Transition (Q: Type u_) (S: Type u_) (Γ: Type u_) := Q → (Γ × Q) ⊕ Fin 42
-
 structure Predet_DPDA (Q: Type u_) (S: Type u_) (Γ: Type u_) where
   q0 : Q
   transition : Q → (Γ × Q) ⊕ Fin 42
 
-def Predet_Transition.stepTransition {Q: Type u_} {S: Type u_} {Γ: Type u_}
-  (transition: Q → (Γ × Q) ⊕ Fin 42)
-  (pwβ: (Q × List S × List Γ))
-  : Option ((Q × List S × List Γ)) := match transition pwβ.1 with
-  | Sum.inl (γ, q) => some ⟨q, pwβ.2.1, γ :: pwβ.2.2⟩
-  | Sum.inr f => sorry
-
 def Predet_DPDA.stepTransition {Q: Type u_} {S: Type u_} {Γ: Type u_}
   (M: Predet_DPDA Q S Γ)
   (pwβ: (Q × List S × List Γ))
-  : Option ((Q × List S × List Γ)) :=
-  Predet_Transition.stepTransition M.transition pwβ
+  : Option ((Q × List S × List Γ)) := match M.transition pwβ.1 with
+  | Sum.inl (γ, q) => some ⟨q, pwβ.2.1, γ :: pwβ.2.2⟩
+  | Sum.inr f => sorry
 
 structure Sipser_PreDPDA (Q S Γ) where
   q0 : Q
