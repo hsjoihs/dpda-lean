@@ -3,35 +3,3 @@ import Mathlib.Data.Finset.Insert
 import Mathlib.Data.Fintype.Basic
 import Mathlib.Data.Fintype.Prod
 import Mathlib.Data.Fintype.Option
-
-universe u
-
-def equiv_fintype {α β} (eqv : α ≃ β) [ft : Fintype α] : Fintype β :=
-  { elems := Fintype.elems.map eqv.toEmbedding,
-    complete := by intro b; simp only [Finset.mem_map_equiv, ft.complete]
-  }
-
--- $\Gamma_\varepsilon := \{ j \in \Gamma^* \mid \operatorname{len}(j) \le 1 \} \cong \Gamma \cup \{ \varepsilon \} $
-inductive AugmentEpsilon (Γ: Type u) where
-  | fromChar : Γ → AugmentEpsilon Γ
-  | Epsilon : AugmentEpsilon Γ
-deriving DecidableEq
-
-
-def augmentEpsilon_option_equiv {Γ} : AugmentEpsilon Γ ≃ Option Γ :=
-  let toFn : AugmentEpsilon Γ → Option Γ
-      | AugmentEpsilon.fromChar g => some g
-      | AugmentEpsilon.Epsilon => none
-  let backFn : Option Γ → AugmentEpsilon Γ
-      | none => AugmentEpsilon.Epsilon
-      | some g => AugmentEpsilon.fromChar g
-  { toFun := toFn, invFun := backFn,
-    left_inv := by intro a; cases a <;> rfl,
-    right_inv := by intro o; cases o <;> rfl }
-
-instance AugmentEpsilon.fintype {Γ} [ft : Fintype Γ]: Fintype (AugmentEpsilon Γ) := equiv_fintype augmentEpsilon_option_equiv.symm
-
-def AugmentEpsilon.toList {Γ} (α: AugmentEpsilon Γ) : List Γ :=
-  match α with
-  | AugmentEpsilon.fromChar g => [g]
-  | AugmentEpsilon.Epsilon => []

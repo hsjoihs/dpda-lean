@@ -15,7 +15,7 @@ def Predet_DPDA_IDesc.toSipser {Q S Γ} [DecidableEq Q] (M: Predet_DPDA_IDesc Q 
 -- · It keeps on popping the state without consuming the input
 def Predet_DPDA.toSipser {Q S Γ} [DecidableEq Q] (M: Predet_DPDA Q S Γ) : Sipser_DPDA (Option Q) S Γ :=
   let ⟨ q0, F, dot_delta ⟩ := M
-  let sipser_delta_curried : (Option Q) → AugmentEpsilon Γ → AugmentEpsilon S → Option (Option Q × AugmentEpsilon Γ) :=
+  let sipser_delta_curried : (Option Q) → Option Γ → Option S → Option (Option Q × Option Γ) :=
     fun p_ => match p_ with
      | none => /- death trap -/
         /- Should always pop any stack alphabet, without consuming the input.
@@ -26,9 +26,9 @@ def Predet_DPDA.toSipser {Q S Γ} [DecidableEq Q] (M: Predet_DPDA Q S Γ) : Sips
           ∀ a : S,           δ(qNeg1, a, ε) = none
          -/
        fun stack_consumption input_consumption => match input_consumption, stack_consumption with
-        | AugmentEpsilon.Epsilon, AugmentEpsilon.fromChar _ =>
+        | none, some _ =>
           -- pop the stack and stay in the death trap state
-            some (none, AugmentEpsilon.Epsilon)
+            some (none, none)
         | _, _ => none
           -- we do not want any other path that consumes the input
 
@@ -43,7 +43,7 @@ def Predet_DPDA.toSipser {Q S Γ} [DecidableEq Q] (M: Predet_DPDA Q S Γ) : Sips
           ∀ a : S, ∀ G : Γ,  δ(p, a, G) = none
          -/
          fun stack_consumption input_consumption => match input_consumption, stack_consumption with
-          | AugmentEpsilon.Epsilon, AugmentEpsilon.Epsilon => some (some q, AugmentEpsilon.fromChar α)
+          | none, none => some (some q, some α)
           | _, _ => none
         | Predet_Judge.popAndDecideWhetherToConsume fΓ_wS =>
           /- The function `fΓ_wS : Option Γ → Option (Q ⊕ (S → Option Q))` encodes two pieces of information:
@@ -59,10 +59,10 @@ def Predet_DPDA.toSipser {Q S Γ} [DecidableEq Q] (M: Predet_DPDA Q S Γ) : Sips
 
             ∀ a x,
                 exactly_one_some
-                  (pda.transition (p, AugmentEpsilon.fromChar a, AugmentEpsilon.fromChar x))
-                  (pda.transition (p, AugmentEpsilon.fromChar a, AugmentEpsilon.Epsilon))
-                  (pda.transition (p, AugmentEpsilon.Epsilon, AugmentEpsilon.fromChar x))
-                  (pda.transition (p, AugmentEpsilon.Epsilon, AugmentEpsilon.Epsilon))
+                  (pda.transition (p, some a, some x))
+                  (pda.transition (p, some a, none))
+                  (pda.transition (p, none, some x))
+                  (pda.transition (p, none, none))
 
 
           -/
@@ -71,103 +71,103 @@ def Predet_DPDA.toSipser {Q S Γ} [DecidableEq Q] (M: Predet_DPDA Q S Γ) : Sips
           | some (Sum.inl q) =>
             -- the non-popping, non-consuming transition is populated
             fun stack_consumption input_consumption => match input_consumption, stack_consumption with
-            | AugmentEpsilon.Epsilon, AugmentEpsilon.Epsilon => some (some q, AugmentEpsilon.Epsilon)
+            | none, none => some (some q, none)
             | _, _ => none
           | some (Sum.inr (f2 : S → Option Q)) =>
             -- the non-popping, consuming transition is populated
             fun stack_consumption => match stack_consumption with
-            | AugmentEpsilon.fromChar _ =>
+            | some _ =>
               fun input_consumption => none -- the popping path is definitely not populated
 
-            | AugmentEpsilon.Epsilon =>
+            | none =>
               /-
 
               So far, we have guaranteed
 
               ∀ a x,
-                  (pda.transition (p, AugmentEpsilon.fromChar a, AugmentEpsilon.fromChar x)) == none
-               ∧  (pda.transition (p, AugmentEpsilon.Epsilon, AugmentEpsilon.fromChar x)) == none
+                  (pda.transition (p, some a, some x)) == none
+               ∧  (pda.transition (p, none, some x)) == none
 
               Thus we are left with
 
               ∀ a,
                 exactly_one_some
-                  (pda.transition (p, AugmentEpsilon.fromChar a, AugmentEpsilon.Epsilon))
-                  (pda.transition (p, AugmentEpsilon.Epsilon, AugmentEpsilon.Epsilon))
+                  (pda.transition (p, some a, none))
+                  (pda.transition (p, none, none))
 
               To satisfy this, we populate
-               (pda.transition (p, AugmentEpsilon.fromChar a, AugmentEpsilon.Epsilon))
+               (pda.transition (p, some a, none))
                for each `a` in `S`, and we set
-               (pda.transition (p, AugmentEpsilon.Epsilon, AugmentEpsilon.Epsilon)) to `none`.
+               (pda.transition (p, none, none)) to `none`.
               -/
               fun input_consumption => match input_consumption with
-              | AugmentEpsilon.Epsilon => none
-              | AugmentEpsilon.fromChar a => match f2 a with
-                | some q => some (some q, AugmentEpsilon.Epsilon)
+              | none => none
+              | some a => match f2 a with
+                | some q => some (some q, none)
                 | none =>
                   /-
                     Raises an error in the original machine.
                     Since in Sipser we need to populate this, I implement this as a transition to the death trap state.
                   -/
-                  some (none, AugmentEpsilon.Epsilon)
+                  some (none, none)
           | none =>
             -- The non-popping is unpopulated
             -- Thus we need to populate the popping transition
 
             fun stack_consumption => match stack_consumption with
-            | AugmentEpsilon.Epsilon =>
+            | none =>
               fun input_consumption => none -- the non-popping path is definitely not populated
 
-            | AugmentEpsilon.fromChar x =>
+            | some x =>
               let pop : Option (Q ⊕ (S → Option Q)) := fΓ_wS (some x)
               /-
 
               So far, we have guaranteed
 
               ∀ a,
-                    (pda.transition (p, AugmentEpsilon.fromChar a, AugmentEpsilon.Epsilon)) == none
-                  ∧ (pda.transition (p, AugmentEpsilon.Epsilon, AugmentEpsilon.Epsilon)) == none
+                    (pda.transition (p, some a, none)) == none
+                  ∧ (pda.transition (p, none, none)) == none
 
               Thus we are now left with
 
               ∀ a x,
                   exactly_one_some
-                    (pda.transition (p, AugmentEpsilon.fromChar a, AugmentEpsilon.fromChar x))
-                    (pda.transition (p, AugmentEpsilon.Epsilon, AugmentEpsilon.fromChar x))
+                    (pda.transition (p, some a, some x))
+                    (pda.transition (p, none, some x))
               -/
               match pop with
               | some (Sum.inl q) =>
                 -- The machine popped the stack, got `x`, and moved to `q`, without consuming the input.
                 fun input_consumption => match input_consumption with
-                | AugmentEpsilon.fromChar _ => none /- A path of consumption should not exist -/
-                | AugmentEpsilon.Epsilon => some (some q, AugmentEpsilon.Epsilon)
+                | some _ => none /- A path of consumption should not exist -/
+                | none => some (some q, none)
               | some (Sum.inr (f2 : S → Option Q)) =>
                 -- The machine popped the stack, got `x`, and decided to consume the input
                 fun input_consumption => match input_consumption with
-                | AugmentEpsilon.Epsilon => none /- Epsilon transition should not exist -/
-                | AugmentEpsilon.fromChar a => match f2 a with
-                  | some q => some (some q, AugmentEpsilon.fromChar x)
+                | none => none /- Epsilon transition should not exist -/
+                | some a => match f2 a with
+                  | some q => some (some q, some x)
                   | none =>
                     /-
                       Raises an error in the original machine.
                       Since in Sipser we need to populate this, I implement this as a transition to the death trap state.
                     -/
-                    some (none, AugmentEpsilon.Epsilon)
+                    some (none, none)
               | none =>
                 -- The machine popped the stack, got `x`, and decided to raise an error.
                 -- Since in Sipser we need to populate this, I implement this as an epsilon transition to the death trap state.
                 fun input_consumption => match input_consumption with
-                | AugmentEpsilon.Epsilon => some (none, AugmentEpsilon.Epsilon)
-                | AugmentEpsilon.fromChar _ => none /- A path of consumption should not exist -/
+                | none => some (none, none)
+                | some _ => none /- A path of consumption should not exist -/
   let is_deterministic := by
     intro q a x
     simp only
     suffices h :
       exactly_one_some
-        (sipser_delta_curried q (AugmentEpsilon.fromChar x) (AugmentEpsilon.fromChar a))
-        (sipser_delta_curried q AugmentEpsilon.Epsilon (AugmentEpsilon.fromChar a))
-        (sipser_delta_curried q (AugmentEpsilon.fromChar x) AugmentEpsilon.Epsilon)
-        (sipser_delta_curried q AugmentEpsilon.Epsilon AugmentEpsilon.Epsilon) = true from h
+        (sipser_delta_curried q (some x) (some a))
+        (sipser_delta_curried q none (some a))
+        (sipser_delta_curried q (some x) none)
+        (sipser_delta_curried q none none) = true from h
     simp only [sipser_delta_curried]
     match q with
     | none => -- death trap state

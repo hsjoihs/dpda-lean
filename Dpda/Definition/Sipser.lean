@@ -6,7 +6,7 @@ import Dpda.AugmentSingleton
 structure Sipser_PreDPDA (Q S Γ) where
   q0 : Q
   F : Finset Q
-  transition : Q × AugmentEpsilon S × AugmentEpsilon Γ -> Option (Q × AugmentEpsilon Γ)
+  transition : Q × Option S × Option Γ -> Option (Q × Option Γ)
 
 def exactly_one_some {α}
   (o1 : Option α)
@@ -23,10 +23,10 @@ structure Sipser_DPDA(Q S Γ) where
   pda : Sipser_PreDPDA Q S Γ
   deterministic : ∀ q a x,
     exactly_one_some
-      (pda.transition (q, AugmentEpsilon.fromChar a, AugmentEpsilon.fromChar x))
-      (pda.transition (q, AugmentEpsilon.fromChar a, AugmentEpsilon.Epsilon))
-      (pda.transition (q, AugmentEpsilon.Epsilon, AugmentEpsilon.fromChar x))
-      (pda.transition (q, AugmentEpsilon.Epsilon, AugmentEpsilon.Epsilon))
+      (pda.transition (q, some a, some x))
+      (pda.transition (q, some a, none))
+      (pda.transition (q, none, some x))
+      (pda.transition (q, none, none))
 
 structure Sipser_DPDA_IDesc (Q) (S) (Γ) where
   p : Q
@@ -46,7 +46,7 @@ def Sipser_PreDPDA.stepTransition {Q S Γ}
   If the stack is empty, a Sipser DPDA can move only if the transition function specifies a move that pops ε.
   -/
 
-  match M.transition (pwβ.p, AugmentEpsilon.Epsilon, AugmentEpsilon.Epsilon) with
+  match M.transition (pwβ.p, none, none) with
   | some (r, y) =>
     -- If δ(q, ε, ε) is nonempty, there is no restriction on the input or stack.
     -- · move to the state r,
@@ -64,7 +64,7 @@ def Sipser_PreDPDA.stepTransition {Q S Γ}
       none
     | [], x :: xs =>
       -- We cannot consume from an empty input, so our only hope is δ(q, ε, x), a transition without the input consumption.
-      match M.transition (pwβ.p, AugmentEpsilon.Epsilon, AugmentEpsilon.fromChar x) with
+      match M.transition (pwβ.p, none, some x) with
       | some (r, y) =>
         -- If δ(q, ε, x) is nonempty, we can pop x from the stack,
         -- move to the state r,
@@ -76,7 +76,7 @@ def Sipser_PreDPDA.stepTransition {Q S Γ}
         none
     | a :: ws, [] =>
       -- If the stack is empty, our only legal option is δ(q, a, ε), a transition without the stack pop.
-      match M.transition (pwβ.p, AugmentEpsilon.fromChar a, AugmentEpsilon.Epsilon) with
+      match M.transition (pwβ.p, some a, none) with
       | some (r, y) =>
         -- If δ(q, a, ε) is nonempty, we can consume a from the input,
         -- move to the state r,
@@ -90,9 +90,9 @@ def Sipser_PreDPDA.stepTransition {Q S Γ}
       -- If both the input and the stack are nonempty, we have options.
       -- Exactly one of δ(q, a, x), δ(q, ε, x), or δ(q, a, ε) is `some`, and we have to choose the one that is `some`.
       match
-        (M.transition (pwβ.p, AugmentEpsilon.fromChar a, AugmentEpsilon.fromChar x)),
-        (M.transition (pwβ.p, AugmentEpsilon.fromChar a, AugmentEpsilon.Epsilon)),
-        (M.transition (pwβ.p, AugmentEpsilon.Epsilon, AugmentEpsilon.fromChar x)) with
+        (M.transition (pwβ.p, some a, some x)),
+        (M.transition (pwβ.p, some a, none)),
+        (M.transition (pwβ.p, none, some x)) with
       | some (r, y), none, none =>
         -- If δ(q, a, x) is nonempty, we can consume a from the input,
         -- move to the state r,
@@ -124,7 +124,7 @@ def Sipser_DPDA.stepTransition {Q S Γ}
   If the stack is empty, a Sipser DPDA can move only if the transition function specifies a move that pops ε.
   -/
 
-  match hεε : M.pda.transition (pwβ.p, AugmentEpsilon.Epsilon, AugmentEpsilon.Epsilon) with
+  match hεε : M.pda.transition (pwβ.p, none, none) with
   | some (r, y) =>
     -- If δ(q, ε, ε) is nonempty, there is no restriction on the input or stack.
     -- · move to the state r,
@@ -142,7 +142,7 @@ def Sipser_DPDA.stepTransition {Q S Γ}
       none
     | [], x :: xs =>
       -- We cannot consume from an empty input, so our only hope is δ(q, ε, x), a transition without the input consumption.
-      match h2 : M.pda.transition (pwβ.p, AugmentEpsilon.Epsilon, AugmentEpsilon.fromChar x) with
+      match h2 : M.pda.transition (pwβ.p, none, some x) with
       | some (r, y) =>
         -- If δ(q, ε, x) is nonempty, we can pop x from the stack,
         -- move to the state r,
@@ -154,7 +154,7 @@ def Sipser_DPDA.stepTransition {Q S Γ}
         none
     | a :: ws, [] =>
       -- If the stack is empty, our only legal option is δ(q, a, ε), a transition without the stack pop.
-      match h2 : M.pda.transition (pwβ.p, AugmentEpsilon.fromChar a, AugmentEpsilon.Epsilon) with
+      match h2 : M.pda.transition (pwβ.p, some a, none) with
       | some (r, y) =>
         -- If δ(q, a, ε) is nonempty, we can consume a from the input,
         -- move to the state r,
@@ -168,9 +168,9 @@ def Sipser_DPDA.stepTransition {Q S Γ}
       -- If both the input and the stack are nonempty, we have options.
       -- Exactly one of δ(q, a, x), δ(q, ε, x), or δ(q, a, ε) is `some`, and we have to choose the one that is `some`.
       match
-        hax : (M.pda.transition (pwβ.p, AugmentEpsilon.fromChar a, AugmentEpsilon.fromChar x)),
-        haε : (M.pda.transition (pwβ.p, AugmentEpsilon.fromChar a, AugmentEpsilon.Epsilon)),
-        hεx : (M.pda.transition (pwβ.p, AugmentEpsilon.Epsilon, AugmentEpsilon.fromChar x)) with
+        hax : (M.pda.transition (pwβ.p, some a, some x)),
+        haε : (M.pda.transition (pwβ.p, some a, none)),
+        hεx : (M.pda.transition (pwβ.p, none, some x)) with
       | some (r, y), none, none =>
         -- If δ(q, a, x) is nonempty, we can consume a from the input,
         -- move to the state r,
