@@ -46,7 +46,7 @@ def Predet_DPDA.toSipser {Q S Γ} [DecidableEq Q] (M: Predet_DPDA Q S Γ) : Sips
           | AugmentEpsilon.Epsilon, AugmentEpsilon.Epsilon => some (AugmentOneState.fromQ q, AugmentEpsilon.fromChar α)
           | _, _ => none
         | Predet_Judge.popAndDecideWhetherToConsume fΓ_wS =>
-          /- The function `fΓ_wS : AugmentZ0 Γ → Option (Q ⊕ (S → Option Q))` encodes two pieces of information:
+          /- The function `fΓ_wS : Option Γ → Option (Q ⊕ (S → Option Q))` encodes two pieces of information:
             · When applied to .z0, it corresponds to a non-popping transition.
             · When applied to .fromΓ A, it corresponds to a popping transition.
 
@@ -66,7 +66,7 @@ def Predet_DPDA.toSipser {Q S Γ} [DecidableEq Q] (M: Predet_DPDA Q S Γ) : Sips
 
 
           -/
-          let nonpop : Option (Q ⊕ (S → Option Q)) := fΓ_wS AugmentZ0.z0
+          let nonpop : Option (Q ⊕ (S → Option Q)) := fΓ_wS none
           match nonpop with
           | some (Sum.inl q) =>
             -- the non-popping, non-consuming transition is populated
@@ -119,7 +119,7 @@ def Predet_DPDA.toSipser {Q S Γ} [DecidableEq Q] (M: Predet_DPDA Q S Γ) : Sips
               fun input_consumption => none -- the non-popping path is definitely not populated
 
             | AugmentEpsilon.fromChar x =>
-              let pop : Option (Q ⊕ (S → Option Q)) := fΓ_wS (AugmentZ0.fromΓ x)
+              let pop : Option (Q ⊕ (S → Option Q)) := fΓ_wS (some x)
               /-
 
               So far, we have guaranteed
@@ -178,7 +178,7 @@ def Predet_DPDA.toSipser {Q S Γ} [DecidableEq Q] (M: Predet_DPDA Q S Γ) : Sips
         simp only [exactly_one_some, h]
       | Predet_Judge.popAndDecideWhetherToConsume fΓ_wS =>
         simp only [exactly_one_some, h]
-        match h2 : fΓ_wS AugmentZ0.z0 with
+        match h2 : fΓ_wS none with
         | some (Sum.inl q2) =>
           simp only
         | some (Sum.inr f2) =>
@@ -188,7 +188,7 @@ def Predet_DPDA.toSipser {Q S Γ} [DecidableEq Q] (M: Predet_DPDA Q S Γ) : Sips
           | none => simp only
         | none =>
           simp only
-          match fΓ_wS (AugmentZ0.fromΓ x) with
+          match fΓ_wS (some x) with
           | some (Sum.inl q2) =>
             simp only
           | some (Sum.inr f2) =>

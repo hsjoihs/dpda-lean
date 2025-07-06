@@ -3,7 +3,7 @@ import Dpda.AugmentSingleton
 universe u_
 
 abbrev PADWTC (Q: Type u_) (S: Type u_) (Γ: Type u_) :=
-  AugmentZ0 Γ → Option (Q ⊕ (S → Option Q))
+  Option Γ → Option (Q ⊕ (S → Option Q))
 
 inductive Predet_Judge (Q: Type u_) (S: Type u_) (Γ: Type u_)
   | uncondPush : (Γ × Q) → Predet_Judge Q S Γ
@@ -30,7 +30,7 @@ def Predet_Transition.stepTransition {Q: Type u_} {S: Type u_} {Γ: Type u_}
   | Predet_Judge.popAndDecideWhetherToConsume f =>
     match pwβ.β with
     | [] => do
-      let k ← f AugmentZ0.z0
+      let k ← f none
       let ⟨q, x⟩ ← match k with
       | Sum.inl q => some (q, pwβ.w)
       | Sum.inr f2 => match pwβ.w with
@@ -40,7 +40,7 @@ def Predet_Transition.stepTransition {Q: Type u_} {S: Type u_} {Γ: Type u_}
           | some q => some (q, t)
       some ⟨q, x, []⟩
     | A :: γ => do
-      let k ← f (AugmentZ0.fromΓ A)
+      let k ← f (some A)
       let ⟨q, x⟩ ← match k with
       | Sum.inl q => some (q, pwβ.w)
       | Sum.inr f2 => match pwβ.w with

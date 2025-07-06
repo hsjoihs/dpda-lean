@@ -11,26 +11,6 @@ def equiv_fintype {α β} (eqv : α ≃ β) [ft : Fintype α] : Fintype β :=
     complete := by intro b; simp only [Finset.mem_map_equiv, ft.complete]
   }
 
--- $\Gamma_{Z} = \Gamma \cup \{ Z_0 \} $
-inductive AugmentZ0 (Γ: Type u) where
-  | fromΓ : Γ → AugmentZ0 Γ
-  | z0 : AugmentZ0 Γ
-deriving DecidableEq
-
-def augmentZ0_option_equiv {Γ} : AugmentZ0 Γ ≃ Option Γ :=
-  let toFn : AugmentZ0 Γ → Option Γ
-      | AugmentZ0.fromΓ g => some g
-      | AugmentZ0.z0 => none
-  let backFn : Option Γ → AugmentZ0 Γ
-      | none => AugmentZ0.z0
-      | some g => AugmentZ0.fromΓ g
-  { toFun := toFn, invFun := backFn,
-    left_inv := by intro a; cases a <;> rfl,
-    right_inv := by intro o; cases o <;> rfl }
-
-instance AugmentZ0.fintype {Γ} [ft : Fintype Γ]: Fintype (AugmentZ0 Γ) := equiv_fintype augmentZ0_option_equiv.symm
-
-
 inductive AugmentOneState (Q: Type u) where
   | fromQ : Q → AugmentOneState Q
   | qNeg1 : AugmentOneState Q
