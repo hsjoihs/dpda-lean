@@ -13,11 +13,6 @@ inductive Predet_Judge (Q: Type u_) (S: Type u_) (Γ: Type u_)
 abbrev Predet_Transition (Q: Type u_) (S: Type u_) (Γ: Type u_) :=
   Q → Predet_Judge Q S Γ
 
-structure Predet_DPDA_IDesc (Q: Type u_) (S: Type u_) (Γ: Type u_) where
-  p : Q
-  w : List S
-  β : List Γ
-
 structure Predet_DPDA (Q: Type u_) (S: Type u_) (Γ: Type u_) where
   q0 : Q
   F : Finset Q
@@ -25,16 +20,16 @@ structure Predet_DPDA (Q: Type u_) (S: Type u_) (Γ: Type u_) where
 
 def Predet_Transition.stepTransition {Q: Type u_} {S: Type u_} {Γ: Type u_}
   (transition: Predet_Transition Q S Γ)
-  (pwβ: Predet_DPDA_IDesc Q S Γ)
-  : Option (Predet_DPDA_IDesc Q S Γ) := match transition pwβ.p with
-  | Predet_Judge.uncondPush (γ, q) => some ⟨q, pwβ.w, γ :: pwβ.β⟩
+  (pwβ: (Q × List S × List Γ))
+  : Option ((Q × List S × List Γ)) := match transition pwβ.1 with
+  | Predet_Judge.uncondPush (γ, q) => some ⟨q, pwβ.2.1, γ :: pwβ.2.2⟩
   | Predet_Judge.popAndDecideWhetherToConsume f =>
-    match pwβ.β with
+    match pwβ.2.2 with
     | [] => do
       let k ← f none
       let ⟨q, x⟩ ← match k with
-      | Sum.inl q => some (q, pwβ.w)
-      | Sum.inr f2 => match pwβ.w with
+      | Sum.inl q => some (q, pwβ.2.1)
+      | Sum.inr f2 => match pwβ.2.1 with
         | [] => none
         | a :: t => match f2 a with
           | none => none
@@ -43,8 +38,8 @@ def Predet_Transition.stepTransition {Q: Type u_} {S: Type u_} {Γ: Type u_}
     | A :: γ => do
       let k ← f (some A)
       let ⟨q, x⟩ ← match k with
-      | Sum.inl q => some (q, pwβ.w)
-      | Sum.inr f2 => match pwβ.w with
+      | Sum.inl q => some (q, pwβ.2.1)
+      | Sum.inr f2 => match pwβ.2.1 with
         | [] => none
         | a :: t => match f2 a with
           | none => none
@@ -53,8 +48,8 @@ def Predet_Transition.stepTransition {Q: Type u_} {S: Type u_} {Γ: Type u_}
 
 def Predet_DPDA.stepTransition {Q: Type u_} {S: Type u_} {Γ: Type u_}
   (M: Predet_DPDA Q S Γ)
-  (pwβ: Predet_DPDA_IDesc Q S Γ)
-  : Option (Predet_DPDA_IDesc Q S Γ) :=
+  (pwβ: (Q × List S × List Γ))
+  : Option ((Q × List S × List Γ)) :=
   Predet_Transition.stepTransition M.transition pwβ
 
 
@@ -83,95 +78,33 @@ structure Sipser_DPDA(Q S Γ) where
       (pda.transition (q, none, some x))
       (pda.transition (q, none, none))
 
-structure Sipser_DPDA_IDesc (Q) (S) (Γ) where
-  p : Q
-  w : List S
-  β : List Γ
-
-def Sipser_DPDA.stepTransition {Q S Γ}
-  (M: Sipser_DPDA Q S Γ)
-  (pwβ: Sipser_DPDA_IDesc Q S Γ)
-  : Option (Sipser_DPDA_IDesc Q S Γ) :=
-  /-
-
-  A Sipser DPDA has exactly one legal move in every situation where its stack is nonempty.
-  If the stack is empty, a Sipser DPDA can move only if the transition function specifies a move that pops ε.
-  -/
-
-  match hεε : M.pda.transition (pwβ.p, none, none) with
-  | some (r, y) =>
-    -- If δ(q, ε, ε) is nonempty, there is no restriction on the input or stack.
-    -- · move to the state r,
-    -- · consume nothing from the input
-    -- · pop nothing from the stack
-    -- · push y onto the stack
-    some ⟨ r, pwβ.w, y.toList ++ pwβ.β ⟩
+def Sipser_DPDA.stepTransition {Q S Γ} (M: Sipser_DPDA Q S Γ) (pwβ: (Q × List S × List Γ)) : Option ((Q × List S × List Γ)) :=
+  match hεε : M.pda.transition (pwβ.1, none, none) with
+  | some (r, y) => some ⟨ r, pwβ.2.1, y.toList ++ pwβ.2.2 ⟩
   | none =>
-    -- Otherwise, ∀ a x, exactly one of δ(q, a, x), δ(q, ε, x), or δ(q, a, ε) is `some`.
-    -- Thus we first need to check whether the stack or the input is empty.
-    match pwβ.w, pwβ.β with
-    | [], [] =>
-      -- If both the input and the stack are empty, we cannot move,
-      -- since the only potential legal move, δ(q, ε, ε), turned out to be empty.
-      none
+    match pwβ.2.1, pwβ.2.2 with
+    | [], [] => none
     | [], x :: xs =>
-      -- We cannot consume from an empty input, so our only hope is δ(q, ε, x), a transition without the input consumption.
-      match h2 : M.pda.transition (pwβ.p, none, some x) with
-      | some (r, y) =>
-        -- If δ(q, ε, x) is nonempty, we can pop x from the stack,
-        -- move to the state r,
-        -- consume nothing from the input,
-        -- and push y onto the stack.
-        some ⟨ r, pwβ.w, y.toList ++ xs ⟩
-      | none =>
-        -- If δ(q, ε, x) is empty, we cannot move.
-        none
+      match h2 : M.pda.transition (pwβ.1, none, some x) with
+      | some (r, y) => some ⟨ r, pwβ.2.1, y.toList ++ xs ⟩
+      | none => none
     | a :: ws, [] =>
-      -- If the stack is empty, our only legal option is δ(q, a, ε), a transition without the stack pop.
-      match h2 : M.pda.transition (pwβ.p, some a, none) with
-      | some (r, y) =>
-        -- If δ(q, a, ε) is nonempty, we can consume a from the input,
-        -- move to the state r,
-        -- pop nothing from the stack,
-        -- and push y onto the stack.
-        some ⟨ r, ws, y.toList ++ pwβ.β ⟩
-      | none =>
-        -- If δ(q, a, ε) is empty, we cannot move.
-        none
+      match h2 : M.pda.transition (pwβ.1, some a, none) with
+      | some (r, y) => some ⟨ r, ws, y.toList ++ pwβ.2.2 ⟩
+      | none => none
     | a :: ws, x :: xs =>
-      -- If both the input and the stack are nonempty, we have options.
-      -- Exactly one of δ(q, a, x), δ(q, ε, x), or δ(q, a, ε) is `some`, and we have to choose the one that is `some`.
       match
-        hax : (M.pda.transition (pwβ.p, some a, some x)),
-        haε : (M.pda.transition (pwβ.p, some a, none)),
-        hεx : (M.pda.transition (pwβ.p, none, some x)) with
-      | some (r, y), none, none =>
-        -- If δ(q, a, x) is nonempty, we can consume a from the input,
-        -- move to the state r,
-        -- pop x from the stack,
-        -- and push y onto the stack.
-        some ⟨ r, ws, y.toList ++ xs ⟩
-      | none, some (r, y), none =>
-        -- If δ(q, ε, x) is nonempty, we can pop x from the stack,
-        -- move to the state r,
-        -- consume nothing from the input,
-        -- and push y onto the stack.
-        some ⟨ r, pwβ.w, y.toList ++ xs ⟩
-      | none, none, some (r, y) =>
-        -- If δ(q, a, ε) is nonempty, we can consume a from the input,
-        -- move to the state r,
-        -- pop nothing from the stack,
-        -- and push y onto the stack.
-        some ⟨ r, ws, y.toList ++ pwβ.β ⟩
-      | some _, some _, some _ => False.elim <| by have h3 := M.deterministic pwβ.p a x; simp [exactly_one_some, hεε, hax, haε, hεx] at h3
-      | some _, some _, none   => False.elim <| by have h3 := M.deterministic pwβ.p a x; simp [exactly_one_some, hεε, hax, haε, hεx] at h3
-      | some _, none, some _   => False.elim <| by have h3 := M.deterministic pwβ.p a x; simp [exactly_one_some, hεε, hax, haε, hεx] at h3
-      | none, some _, some _   => False.elim <| by have h3 := M.deterministic pwβ.p a x; simp [exactly_one_some, hεε, hax, haε, hεx] at h3
-      | none, none, none       => False.elim <| by have h3 := M.deterministic pwβ.p a x; simp [exactly_one_some, hεε, hax, haε, hεx] at h3
-
-def Predet_DPDA_IDesc.toSipser {Q S Γ} [DecidableEq Q] (M: Predet_DPDA_IDesc Q S Γ) : Sipser_DPDA_IDesc (Option Q) S Γ :=
-  let ⟨ p, w, β ⟩ := M
-  ⟨ some p, w, β ⟩
+        hax : (M.pda.transition (pwβ.1, some a, some x)),
+        haε : (M.pda.transition (pwβ.1, some a, none)),
+        hεx : (M.pda.transition (pwβ.1, none, some x)) with
+      | some (r, y), none, none => some ⟨ r, ws, y.toList ++ xs ⟩
+      | none, some (r, y), none => some ⟨ r, pwβ.2.1, y.toList ++ xs ⟩
+      | none, none, some (r, y) => some ⟨ r, ws, y.toList ++ pwβ.2.2 ⟩
+      | some _, some _, some _ => False.elim <| by have h3 := M.deterministic pwβ.1 a x; simp [exactly_one_some, hεε, hax, haε, hεx] at h3
+      | some _, some _, none   => False.elim <| by have h3 := M.deterministic pwβ.1 a x; simp [exactly_one_some, hεε, hax, haε, hεx] at h3
+      | some _, none, some _   => False.elim <| by have h3 := M.deterministic pwβ.1 a x; simp [exactly_one_some, hεε, hax, haε, hεx] at h3
+      | none, some _, some _   => False.elim <| by have h3 := M.deterministic pwβ.1 a x; simp [exactly_one_some, hεε, hax, haε, hεx] at h3
+      | none, none, none       => False.elim <| by have h3 := M.deterministic pwβ.1 a x; simp [exactly_one_some, hεε, hax, haε, hεx] at h3
 
 
 -- The augmented state is the "death trap" state.
@@ -200,11 +133,11 @@ def Predet_DPDA.toSipser {Q S Γ} [DecidableEq Q] (M: Predet_DPDA Q S Γ) : Sips
 
 theorem Predet_to_Sipser_preserves_semantics_single_step {Q S Γ}
   [Fintype Q] [DecidableEq Q] [Fintype S] [Fintype Γ] [DecidableEq Γ]
-  (M: Predet_DPDA Q S Γ) (idesc: Predet_DPDA_IDesc Q S Γ) :
-  Predet_DPDA_IDesc.toSipser <$> M.stepTransition idesc = M.toSipser.stepTransition idesc.toSipser := by
+  (M: Predet_DPDA Q S Γ) (idesc: (Q × List S × List Γ)) :
+  (fun ⟨ p, w, β ⟩ => ⟨ some p, w, β ⟩) <$> M.stepTransition idesc = M.toSipser.stepTransition (idesc |> fun ⟨ p, w, β ⟩ => ⟨ some p, w, β ⟩) := by
   simp [Functor.map]
-  match h : M.transition idesc.p with
+  match h : M.transition idesc.1 with
   | Predet_Judge.uncondPush (α, q) =>
-    simp [Predet_DPDA_IDesc.toSipser, Predet_DPDA.toSipser, Predet_DPDA.stepTransition, Sipser_DPDA.stepTransition]
+    simp [Predet_DPDA.toSipser, Predet_DPDA.stepTransition, Sipser_DPDA.stepTransition]
     rw [h] -- This is where I got `motive is not type correct`
   | Predet_Judge.popAndDecideWhetherToConsume fΓ_wS => sorry
