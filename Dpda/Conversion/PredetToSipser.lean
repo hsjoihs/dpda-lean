@@ -3,9 +3,9 @@ import Dpda.Definition.PredeterminedToPushOrPop
 
 universe u_
 
-def Predet_DPDA_IDesc.toSipser {Q S Γ} [DecidableEq Q] (M: Predet_DPDA_IDesc Q S Γ) : Sipser_DPDA_IDesc (AugmentOneState Q) S Γ :=
+def Predet_DPDA_IDesc.toSipser {Q S Γ} [DecidableEq Q] (M: Predet_DPDA_IDesc Q S Γ) : Sipser_DPDA_IDesc (Option Q) S Γ :=
   let ⟨ p, w, β ⟩ := M
-  ⟨ AugmentOneState.fromQ p, w, β ⟩
+  ⟨ some p, w, β ⟩
 
 
 -- The augmented state is the "death trap" state.
@@ -13,11 +13,11 @@ def Predet_DPDA_IDesc.toSipser {Q S Γ} [DecidableEq Q] (M: Predet_DPDA_IDesc Q 
 -- we add a "death trap" as the following state:
 -- · It does not belong to the acceptance set
 -- · It keeps on popping the state without consuming the input
-def Predet_DPDA.toSipser {Q S Γ} [DecidableEq Q] (M: Predet_DPDA Q S Γ) : Sipser_DPDA (AugmentOneState Q) S Γ :=
+def Predet_DPDA.toSipser {Q S Γ} [DecidableEq Q] (M: Predet_DPDA Q S Γ) : Sipser_DPDA (Option Q) S Γ :=
   let ⟨ q0, F, dot_delta ⟩ := M
-  let sipser_delta_curried : (AugmentOneState Q) → AugmentEpsilon Γ → AugmentEpsilon S → Option (AugmentOneState Q × AugmentEpsilon Γ) :=
+  let sipser_delta_curried : (Option Q) → AugmentEpsilon Γ → AugmentEpsilon S → Option (Option Q × AugmentEpsilon Γ) :=
     fun p_ => match p_ with
-     | AugmentOneState.qNeg1 => /- death trap -/
+     | none => /- death trap -/
         /- Should always pop any stack alphabet, without consuming the input.
 
                              δ(qNeg1, ε, ε) = none
@@ -28,11 +28,11 @@ def Predet_DPDA.toSipser {Q S Γ} [DecidableEq Q] (M: Predet_DPDA Q S Γ) : Sips
        fun stack_consumption input_consumption => match input_consumption, stack_consumption with
         | AugmentEpsilon.Epsilon, AugmentEpsilon.fromChar _ =>
           -- pop the stack and stay in the death trap state
-            some (AugmentOneState.qNeg1, AugmentEpsilon.Epsilon)
+            some (none, AugmentEpsilon.Epsilon)
         | _, _ => none
           -- we do not want any other path that consumes the input
 
-     | AugmentOneState.fromQ p =>
+     | some p =>
        match dot_delta p with
         | Predet_Judge.uncondPush (α, q) =>
           -- unconditional push
@@ -43,7 +43,7 @@ def Predet_DPDA.toSipser {Q S Γ} [DecidableEq Q] (M: Predet_DPDA Q S Γ) : Sips
           ∀ a : S, ∀ G : Γ,  δ(p, a, G) = none
          -/
          fun stack_consumption input_consumption => match input_consumption, stack_consumption with
-          | AugmentEpsilon.Epsilon, AugmentEpsilon.Epsilon => some (AugmentOneState.fromQ q, AugmentEpsilon.fromChar α)
+          | AugmentEpsilon.Epsilon, AugmentEpsilon.Epsilon => some (some q, AugmentEpsilon.fromChar α)
           | _, _ => none
         | Predet_Judge.popAndDecideWhetherToConsume fΓ_wS =>
           /- The function `fΓ_wS : Option Γ → Option (Q ⊕ (S → Option Q))` encodes two pieces of information:
@@ -71,7 +71,7 @@ def Predet_DPDA.toSipser {Q S Γ} [DecidableEq Q] (M: Predet_DPDA Q S Γ) : Sips
           | some (Sum.inl q) =>
             -- the non-popping, non-consuming transition is populated
             fun stack_consumption input_consumption => match input_consumption, stack_consumption with
-            | AugmentEpsilon.Epsilon, AugmentEpsilon.Epsilon => some (AugmentOneState.fromQ q, AugmentEpsilon.Epsilon)
+            | AugmentEpsilon.Epsilon, AugmentEpsilon.Epsilon => some (some q, AugmentEpsilon.Epsilon)
             | _, _ => none
           | some (Sum.inr (f2 : S → Option Q)) =>
             -- the non-popping, consuming transition is populated
@@ -103,13 +103,13 @@ def Predet_DPDA.toSipser {Q S Γ} [DecidableEq Q] (M: Predet_DPDA Q S Γ) : Sips
               fun input_consumption => match input_consumption with
               | AugmentEpsilon.Epsilon => none
               | AugmentEpsilon.fromChar a => match f2 a with
-                | some q => some (AugmentOneState.fromQ q, AugmentEpsilon.Epsilon)
+                | some q => some (some q, AugmentEpsilon.Epsilon)
                 | none =>
                   /-
                     Raises an error in the original machine.
                     Since in Sipser we need to populate this, I implement this as a transition to the death trap state.
                   -/
-                  some (AugmentOneState.qNeg1, AugmentEpsilon.Epsilon)
+                  some (none, AugmentEpsilon.Epsilon)
           | none =>
             -- The non-popping is unpopulated
             -- Thus we need to populate the popping transition
@@ -140,24 +140,24 @@ def Predet_DPDA.toSipser {Q S Γ} [DecidableEq Q] (M: Predet_DPDA Q S Γ) : Sips
                 -- The machine popped the stack, got `x`, and moved to `q`, without consuming the input.
                 fun input_consumption => match input_consumption with
                 | AugmentEpsilon.fromChar _ => none /- A path of consumption should not exist -/
-                | AugmentEpsilon.Epsilon => some (AugmentOneState.fromQ q, AugmentEpsilon.Epsilon)
+                | AugmentEpsilon.Epsilon => some (some q, AugmentEpsilon.Epsilon)
               | some (Sum.inr (f2 : S → Option Q)) =>
                 -- The machine popped the stack, got `x`, and decided to consume the input
                 fun input_consumption => match input_consumption with
                 | AugmentEpsilon.Epsilon => none /- Epsilon transition should not exist -/
                 | AugmentEpsilon.fromChar a => match f2 a with
-                  | some q => some (AugmentOneState.fromQ q, AugmentEpsilon.fromChar x)
+                  | some q => some (some q, AugmentEpsilon.fromChar x)
                   | none =>
                     /-
                       Raises an error in the original machine.
                       Since in Sipser we need to populate this, I implement this as a transition to the death trap state.
                     -/
-                    some (AugmentOneState.qNeg1, AugmentEpsilon.Epsilon)
+                    some (none, AugmentEpsilon.Epsilon)
               | none =>
                 -- The machine popped the stack, got `x`, and decided to raise an error.
                 -- Since in Sipser we need to populate this, I implement this as an epsilon transition to the death trap state.
                 fun input_consumption => match input_consumption with
-                | AugmentEpsilon.Epsilon => some (AugmentOneState.qNeg1, AugmentEpsilon.Epsilon)
+                | AugmentEpsilon.Epsilon => some (none, AugmentEpsilon.Epsilon)
                 | AugmentEpsilon.fromChar _ => none /- A path of consumption should not exist -/
   let is_deterministic := by
     intro q a x
@@ -170,9 +170,9 @@ def Predet_DPDA.toSipser {Q S Γ} [DecidableEq Q] (M: Predet_DPDA Q S Γ) : Sips
         (sipser_delta_curried q AugmentEpsilon.Epsilon AugmentEpsilon.Epsilon) = true from h
     simp only [sipser_delta_curried]
     match q with
-    | AugmentOneState.qNeg1 => -- death trap state
+    | none => -- death trap state
       simp only [exactly_one_some]
-    | AugmentOneState.fromQ p =>
+    | some p =>
       match h : dot_delta p with
       | Predet_Judge.uncondPush (α, q2) =>
         simp only [exactly_one_some, h]
@@ -200,8 +200,8 @@ def Predet_DPDA.toSipser {Q S Γ} [DecidableEq Q] (M: Predet_DPDA Q S Γ) : Sips
             simp only
   ⟨
     ⟨
-    AugmentOneState.fromQ q0,
-    Finset.image AugmentOneState.fromQ F,
+    some q0,
+    Finset.image some F,
     fun (p, input_consumption, stack_consumption) => sipser_delta_curried p stack_consumption input_consumption
     ⟩,
     is_deterministic
