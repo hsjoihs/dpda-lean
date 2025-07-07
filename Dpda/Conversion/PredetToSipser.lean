@@ -295,9 +295,10 @@ theorem Predet_to_Sipser_preserves_semantics_single_step {Q S Γ}
         simp [h2] at heq
         match h3 : idesc.w, h4 : idesc.β with
         | [], [] =>
-          simp [h3, h4]
-          suffices todo : M.transition.stepTransition idesc = none from todo
-          sorry
+          simp only [
+            Predet_Transition.stepTransition, h, h4, h2, h3,
+            Option.bind_eq_bind, Option.bind_some,
+            Option.bind_none, Option.map_none]
         | [], x :: xs =>
           simp [h3, h4]
           rw [h]
@@ -351,25 +352,98 @@ theorem Predet_to_Sipser_preserves_semantics_single_step {Q S Γ}
           simp [h]
           split
           · next ha hb hc =>
+              next r y =>
+              rw [h] at ha; simp at ha; rw [h2] at ha; simp at ha
+              rw [h] at hb; simp at hb; rw [h2] at hb; simp at hb
+              rw [h] at hc; simp at hc; rw [h2] at hc; simp at hc
+              match h6 : fΓ_wS (AugmentZ0.fromΓ a) with
+              | some (Sum.inl q2) =>
+                rw [h6] at ha; simp at ha
+              | none =>
+                rw [h6] at ha; simp at ha
+              | some (Sum.inr f2) =>
+                rw [h6] at ha; simp at ha
+                rw [h6] at hc; simp at hc
+                simp [AugmentEpsilon.toList, Predet_Transition.stepTransition, h, h4, h6, h3, Predet_DPDA_IDesc.toSipser]
+                match h7 : f2 x with
+                | none =>
+                  simp [h7]
+                  exact TODO_goal_is_false
+                | some q =>
+                  simp [h7]
+                  simp [h7] at ha
+                  constructor
+                  · exact ha.left
+                  · rw [← ha.right]
+                    simp
+                    exact TODO_goal_is_false
+          · next ha hb hc =>
+            next r y =>
+            rw [h] at hb; simp at hb; rw [h2] at hb; simp at hb
+          · next ha hb hc =>
+            next r y =>
             rw [h] at ha; simp at ha; rw [h2] at ha; simp at ha
             rw [h] at hb; simp at hb; rw [h2] at hb; simp at hb
             rw [h] at hc; simp at hc; rw [h2] at hc; simp at hc
             match h6 : fΓ_wS (AugmentZ0.fromΓ a) with
             | some (Sum.inl q2) =>
               rw [h6] at ha; simp at ha
+              rw [h6] at hc; simp at hc
+              rw [← hc.left, ← hc.right]
+              simp [AugmentEpsilon.toList]
+              use { p :=  q2, w := xs, β := a :: as }
+              simp [Predet_DPDA_IDesc.toSipser, Predet_Transition.stepTransition, h, h3, h4, h2, h6]
+              exact TODO_goal_is_false
             | none =>
               rw [h6] at ha; simp at ha
+              rw [h6] at hc; simp at hc
+              rw [← hc.left, ← hc.right]
+              simp [AugmentEpsilon.toList, Predet_DPDA_IDesc.toSipser]
+              exact TODO_goal_is_false
             | some (Sum.inr f2) =>
               rw [h6] at ha; simp at ha
               rw [h6] at hc; simp at hc
-              sorry
-          · sorry
-          · sorry
-          · sorry
-          · sorry
-          · sorry
-          · sorry
-          · sorry
+          · next ha hb hc =>
+            rw [h] at ha; simp [h2] at ha
+            rw [h] at hc; simp [h2] at hc
+            match h6 : fΓ_wS (AugmentZ0.fromΓ a) with
+            | some (Sum.inl q2) =>
+              rw [h6] at ha; simp at ha
+            | some (Sum.inr f2) =>
+              rw [h6] at hc; simp at hc
+            | none =>
+              rw [h6] at ha; simp at ha
+          · next ha hb hc =>
+            rw [h] at ha; simp [h2] at ha
+            rw [h] at hb; simp [h2] at hb
+          · next ha hb hc =>
+            rw [h] at ha; simp [h2] at ha
+            rw [h] at hb; simp [h2] at hb
+            rw [h] at hc; simp [h2] at hc
+            match h5 : fΓ_wS (AugmentZ0.fromΓ a) with
+            | some (Sum.inl q2) =>
+              rw [h5] at ha; simp at ha
+            | some (Sum.inr f2) =>
+              rw [h5] at hc; simp at hc
+            | none =>
+              rw [h5] at ha; simp at ha
+          · next ha hb hc =>
+            rw [h] at hb; simp [h2] at hb
+          · next ha hb hc =>
+            rw [h] at hc; simp [h2] at hc
+            rw [h] at hb; simp [h2] at hb
+            rw [h] at ha; simp [h2] at ha
+            match h5 : fΓ_wS (AugmentZ0.fromΓ a) with
+            | some (Sum.inl q2) =>
+              rw [h5] at hc; simp at hc
+            | some (Sum.inr f2) =>
+              rw [h5] at hc; simp at hc
+              rw [h5] at ha; simp at ha
+              match h6 : f2 x with
+              | some q => rw [h6] at ha; simp at ha
+              | none => rw [h6] at ha; simp at ha
+            | none =>
+              rw [h5] at hc; simp at hc
       | some (Sum.inr f2) =>
         simp [h2] at heq
         match h3 : idesc.w, h4 : idesc.β with
@@ -386,7 +460,8 @@ theorem Predet_to_Sipser_preserves_semantics_single_step {Q S Γ}
           simp [Predet_Transition.stepTransition, h, h4, h2, h3]
           intro qa
           suffices todo : ¬fΓ_wS (AugmentZ0.fromΓ x) = some (Sum.inl qa) from todo
-          sorry
+          intro h5
+          exact TODO_goal_is_false
         | x :: xs, [] =>
           simp [h3, h4]
           rw [h]
