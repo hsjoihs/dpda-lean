@@ -326,6 +326,9 @@ theorem Predet_to_Sipser_preserves_semantics_single_step {Q S Γ}
               a.β = y2.toList ++ as
               from todo
             sorry
+
+          -- The remaining are about the paths that are never taken,
+          -- so we simply need to find a contradiction.
           · next r y hb hc hd =>
             rw [h] at hd; simp at hd
             rw [h2] at hd; simp at hd
@@ -338,5 +341,12 @@ theorem Predet_to_Sipser_preserves_semantics_single_step {Q S Γ}
           · next ha hb hc =>
             rw [h] at hc; simp at hc
             rw [h2] at hc; simp at hc
-          · sorry
-          · sorry
+          · next ha hb hc =>
+            rw [h] at hc; simp at hc
+            rw [h2] at hc; simp at hc
+          · next r y hb hc hd =>
+            rw [h] at hc; simp at hc
+            rw [h2] at hc; simp at hc
+            match h5 : f2 x with
+            | some q => simp [h5] at hc
+            | none => simp [h5] at hc
