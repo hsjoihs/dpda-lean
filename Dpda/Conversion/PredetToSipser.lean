@@ -217,8 +217,16 @@ theorem Predet_to_Sipser_preserves_semantics_single_step {Q S Γ}
   ]
   match h : M.transition idesc.p with
   | Predet_Judge.uncondPush (α, q) =>
-    simp [Predet_DPDA_IDesc.toSipser, Predet_DPDA.toSipser, Predet_DPDA.stepTransition, Sipser_DPDA.stepTransition]
-    fun_cases Sipser_DPDA.stepTransition M.toSipser idesc.toSipser
+    -- simp [Predet_DPDA_IDesc.toSipser, Predet_DPDA.toSipser, Predet_DPDA.stepTransition, Sipser_DPDA.stepTransition]
+    fun_cases Sipser_PreDPDA.stepTransition M.toSipser.pda idesc.toSipser
+    · have hee :
+        ∃ r y, M.toSipser.pda.transition (idesc.toSipser.p, AugmentEpsilon.Epsilon, AugmentEpsilon.Epsilon) = some (r, y) := by
+        sorry -- immediate from the assumption, but the assumption is daggered (✝), preventing me from referring to its name
+      obtain ⟨ r_ee, y_ee, hee ⟩ := hee
+      simp [Predet_DPDA_IDesc.toSipser] at hee
+      simp [Predet_DPDA_IDesc.toSipser, Sipser_DPDA.stepTransition]
+      rw [hee] -- motive is not type correct
+      sorry
     · sorry
     · sorry
     · sorry

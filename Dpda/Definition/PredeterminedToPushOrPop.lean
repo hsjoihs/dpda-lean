@@ -20,7 +20,7 @@ structure Predet_DPDA_IDesc (Q: Type u_) (S: Type u_) (Γ: Type u_) where
 structure Predet_DPDA (Q: Type u_) (S: Type u_) (Γ: Type u_) where
   q0 : Q
   F : Finset Q
-  transition : Predet_Transition Q S Γ
+  transition : Q → Predet_Judge Q S Γ
 
 def Predet_Transition.stepTransition {Q: Type u_} {S: Type u_} {Γ: Type u_}
   (transition: Predet_Transition Q S Γ)
