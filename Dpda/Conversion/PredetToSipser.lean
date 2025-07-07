@@ -257,6 +257,9 @@ theorem Predet_to_Sipser_preserves_semantics_single_step {Q S Γ}
             AugmentOneState.fromQ a.p = r ∧
             a.w = idesc.w ∧
             a.β = y.toList ++ idesc.β from todo
+        rw [← h_qr, ← h_εy]
+        use ⟨ q2, idesc.w, idesc.β ⟩
+        simp [AugmentEpsilon.toList, Predet_Transition.stepTransition, h, h2]
         sorry
     · next heq =>
       simp [h] at heq
@@ -285,7 +288,8 @@ theorem Predet_to_Sipser_preserves_semantics_single_step {Q S Γ}
                 w := [],
                 β := AugmentEpsilon.Epsilon.toList ++ xs
               } from todo
-            sorry
+            simp [AugmentEpsilon.toList, Predet_Transition.stepTransition, h, h4, h5, Predet_DPDA_IDesc.toSipser]
+            exact h3
           | none =>
             simp [h5]
             suffices todo : ∃ a,
@@ -295,11 +299,13 @@ theorem Predet_to_Sipser_preserves_semantics_single_step {Q S Γ}
                 w := [],
                 β := AugmentEpsilon.Epsilon.toList ++ xs
               } from todo
-            sorry
+            simp [AugmentEpsilon.toList, Predet_Transition.stepTransition, h, h4, h5, Predet_DPDA_IDesc.toSipser]
+            sorry -- False
           | some (Sum.inr f2) =>
             simp [h5]
             suffices todo : M.transition.stepTransition idesc = none from todo
-            sorry
+            simp only [Predet_Transition.stepTransition, h, h4, h5, h3, Option.bind_eq_bind,
+              Option.bind_some, Option.bind_none]
         | x :: xs, [] =>
           simp [h3, h4]
           rw [h]
@@ -307,22 +313,53 @@ theorem Predet_to_Sipser_preserves_semantics_single_step {Q S Γ}
           rw [h2]
           simp
           suffices todo : M.transition.stepTransition idesc = none from todo
-          sorry
-        | x :: xs, a :: as =>        sorry
+          simp [AugmentEpsilon.toList, Predet_Transition.stepTransition, h, h4, Predet_DPDA_IDesc.toSipser]
+          constructor
+          · intro qa
+            simp [h2]
+          · intro f hf
+            simp [h3]
+            rw [h2] at hf
+            simp at hf -- contradiction
+        | x :: xs, a :: as =>
+          simp [h]
+          split
+          · next ha hb hc =>
+            rw [h] at ha; simp at ha; rw [h2] at ha; simp at ha
+            rw [h] at hb; simp at hb; rw [h2] at hb; simp at hb
+            rw [h] at hc; simp at hc; rw [h2] at hc; simp at hc
+            match h6 : fΓ_wS (AugmentZ0.fromΓ a) with
+            | some (Sum.inl q2) =>
+              rw [h6] at ha; simp at ha
+            | none =>
+              rw [h6] at ha; simp at ha
+            | some (Sum.inr f2) =>
+              rw [h6] at ha; simp at ha
+              rw [h6] at hc; simp at hc
+              sorry
+          · sorry
+          · sorry
+          · sorry
+          · sorry
+          · sorry
+          · sorry
+          · sorry
       | some (Sum.inr f2) =>
         simp [h2] at heq
         match h3 : idesc.w, h4 : idesc.β with
         | [], [] =>
-          simp [h3, h4]
-          suffices todo : M.transition.stepTransition idesc = none from todo
-          sorry
+          simp only [Predet_Transition.stepTransition, h, h4, h2, h3, Option.bind_eq_bind, Option.bind_some,
+            Option.bind_none, Option.map_none]
         | [], x :: xs =>
           simp [h3, h4]
           rw [h]
           simp
           rw [h2]
           simp
-          suffices todo : M.transition.stepTransition idesc = none from todo
+          suffices assert : M.transition.stepTransition idesc = none from assert
+          simp [Predet_Transition.stepTransition, h, h4, h2, h3]
+          intro qa
+          suffices todo : ¬fΓ_wS (AugmentZ0.fromΓ x) = some (Sum.inl qa) from todo
           sorry
         | x :: xs, [] =>
           simp [h3, h4]
@@ -340,7 +377,9 @@ theorem Predet_to_Sipser_preserves_semantics_single_step {Q S Γ}
                 w := xs,
                 β := AugmentEpsilon.Epsilon.toList
             } from todo
-            sorry
+            simp [AugmentEpsilon.toList, Predet_Transition.stepTransition]
+            rw [h]
+            simp [h4, h2, h3, h5, Predet_DPDA_IDesc.toSipser]
           | none =>
             simp [h5]
             suffices todo : ∃ a,
@@ -350,7 +389,10 @@ theorem Predet_to_Sipser_preserves_semantics_single_step {Q S Γ}
                 w := xs,
                 β := AugmentEpsilon.Epsilon.toList
             } from todo
-            sorry
+            simp [AugmentEpsilon.toList, Predet_Transition.stepTransition]
+            rw [h]
+            simp [h4, h2, h3, h5, Predet_DPDA_IDesc.toSipser]
+            sorry -- False
         | x :: xs, a :: as =>
           simp [h3, h4]
           split
@@ -369,7 +411,21 @@ theorem Predet_to_Sipser_preserves_semantics_single_step {Q S Γ}
               a.w = x :: xs ∧
               a.β = y2.toList ++ as
               from todo
-            sorry
+            match h6 : f2 x with
+            | some q =>
+              simp [h6] at hc
+              obtain ⟨ hqr, hεy ⟩ := hc
+              use ⟨q, idesc.w, idesc.β⟩
+              simp [h3, h4]
+              rw [hqr, ← hεy]
+              simp
+              sorry -- False
+            | none =>
+              simp [h6] at hc
+              obtain ⟨ hqr, hεy ⟩ := hc
+              rw [← hqr]
+              simp
+              sorry -- False
 
           -- The remaining are about the paths that are never taken,
           -- so we simply need to find a contradiction.

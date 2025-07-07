@@ -69,7 +69,7 @@ def augmentEpsilon_option_equiv {Γ} : AugmentEpsilon Γ ≃ Option Γ :=
 
 instance AugmentEpsilon.fintype {Γ} [ft : Fintype Γ]: Fintype (AugmentEpsilon Γ) := equiv_fintype augmentEpsilon_option_equiv.symm
 
-def AugmentEpsilon.toList {Γ} (α: AugmentEpsilon Γ) : List Γ :=
+@[simp] def AugmentEpsilon.toList {Γ} (α: AugmentEpsilon Γ) : List Γ :=
   match α with
   | AugmentEpsilon.fromChar g => [g]
   | AugmentEpsilon.Epsilon => []
