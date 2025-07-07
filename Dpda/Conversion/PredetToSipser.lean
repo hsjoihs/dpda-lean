@@ -264,7 +264,51 @@ theorem Predet_to_Sipser_preserves_semantics_single_step {Q S Γ}
       | some (Sum.inl q2) => simp [h2] at heq
       | none =>
         simp [h2] at heq
-        sorry
+        match h3 : idesc.w, h4 : idesc.β with
+        | [], [] =>
+          simp [h3, h4]
+          suffices todo : M.transition.stepTransition idesc = none from todo
+          sorry
+        | [], x :: xs =>
+          simp [h3, h4]
+          rw [h]
+          simp
+          rw [h2]
+          simp
+          match h5 : fΓ_wS (AugmentZ0.fromΓ x) with
+          | some (Sum.inl q2) =>
+            simp [h5]
+            suffices todo : ∃ a,
+              M.transition.stepTransition idesc = some a ∧
+              a.toSipser = {
+                p := AugmentOneState.fromQ q2,
+                w := [],
+                β := AugmentEpsilon.Epsilon.toList ++ xs
+              } from todo
+            sorry
+          | none =>
+            simp [h5]
+            suffices todo : ∃ a,
+              M.transition.stepTransition idesc = some a ∧
+              a.toSipser = {
+                p := AugmentOneState.qNeg1,
+                w := [],
+                β := AugmentEpsilon.Epsilon.toList ++ xs
+              } from todo
+            sorry
+          | some (Sum.inr f2) =>
+            simp [h5]
+            suffices todo : M.transition.stepTransition idesc = none from todo
+            sorry
+        | x :: xs, [] =>
+          simp [h3, h4]
+          rw [h]
+          simp
+          rw [h2]
+          simp
+          suffices todo : M.transition.stepTransition idesc = none from todo
+          sorry
+        | x :: xs, a :: as =>        sorry
       | some (Sum.inr f2) =>
         simp [h2] at heq
         match h3 : idesc.w, h4 : idesc.β with
