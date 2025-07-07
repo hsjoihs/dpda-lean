@@ -211,17 +211,17 @@ theorem Predet_to_Sipser_preserves_semantics_single_step {Q S Γ}
   [Fintype Q] [DecidableEq Q] [Fintype S] [Fintype Γ] [DecidableEq Γ]
   (M: Predet_DPDA Q S Γ) (idesc: Predet_DPDA_IDesc Q S Γ) :
   Predet_DPDA_IDesc.toSipser <$> M.stepTransition idesc = M.toSipser.stepTransition idesc.toSipser := by
-  simp [Functor.map,
-  -- Predet_DPDA_IDesc.toSipser,     Predet_DPDA.toSipser,
-  -- Predet_DPDA.stepTransition, Sipser_DPDA.stepTransition,
-  ]
+  simp [Functor.map]
   match h : M.transition idesc.p with
   | Predet_Judge.uncondPush (α, q) =>
     simp [Predet_DPDA_IDesc.toSipser, Predet_DPDA.toSipser, Predet_DPDA.stepTransition, Sipser_DPDA.stepTransition]
     split
     · next r y heq =>
       simp [Predet_DPDA_IDesc.toSipser, Predet_DPDA.toSipser, Predet_DPDA.stepTransition, Sipser_DPDA.stepTransition]
-      have r_is_old : ∃ p, AugmentOneState.fromQ p = r := sorry
+      have r_is_old : ∃ p, AugmentOneState.fromQ p = r := by
+        simp [h] at heq
+        use q
+        exact heq.left
       obtain ⟨ r_in_p, r_is_old ⟩ := r_is_old
       use ⟨ r_in_p, idesc.w, y.toList ++ idesc.β ⟩
       simp [r_is_old]
@@ -237,6 +237,105 @@ theorem Predet_to_Sipser_preserves_semantics_single_step {Q S Γ}
       · rw [← h_αy]
         simp [AugmentEpsilon.toList]
     · next heq =>
-      sorry
+      simp [h] at heq
   | Predet_Judge.popAndDecideWhetherToConsume fΓ_wS =>
-    sorry
+    simp [Predet_DPDA_IDesc.toSipser, Predet_DPDA.toSipser, Predet_DPDA.stepTransition, Sipser_DPDA.stepTransition]
+    split
+    · next r y heq =>
+      simp [h] at heq
+      match h2 : fΓ_wS AugmentZ0.z0 with
+      | none => simp [h2] at heq
+      | some (Sum.inr f2) => simp [h2] at heq
+      | some (Sum.inl q2) =>
+        simp [h2] at heq
+        obtain ⟨ h_qr, h_εy ⟩ := heq
+        simp [Predet_DPDA_IDesc.toSipser, Predet_DPDA.toSipser, Predet_DPDA.stepTransition, Sipser_DPDA.stepTransition]
+        have r_is_old : ∃ p, AugmentOneState.fromQ p = r := by use q2
+        obtain ⟨ r_in_p, r_is_old ⟩ := r_is_old
+        suffices todo : ∃ a,
+            M.transition.stepTransition idesc = some a ∧
+            AugmentOneState.fromQ a.p = r ∧
+            a.w = idesc.w ∧
+            a.β = y.toList ++ idesc.β from todo
+        sorry
+    · next heq =>
+      simp [h] at heq
+      match h2 : fΓ_wS AugmentZ0.z0 with
+      | some (Sum.inl q2) => simp [h2] at heq
+      | none =>
+        simp [h2] at heq
+        sorry
+      | some (Sum.inr f2) =>
+        simp [h2] at heq
+        match h3 : idesc.w, h4 : idesc.β with
+        | [], [] =>
+          simp [h3, h4]
+          suffices todo : M.transition.stepTransition idesc = none from todo
+          sorry
+        | [], x :: xs =>
+          simp [h3, h4]
+          rw [h]
+          simp
+          rw [h2]
+          simp
+          suffices todo : M.transition.stepTransition idesc = none from todo
+          sorry
+        | x :: xs, [] =>
+          simp [h3, h4]
+          rw [h]
+          simp
+          rw [h2]
+          simp
+          match h5 : f2 x with
+          | some q =>
+            simp [h5]
+            suffices todo : ∃ a,
+              M.transition.stepTransition idesc = some a ∧
+              a.toSipser = {
+                p := AugmentOneState.fromQ q,
+                w := xs,
+                β := AugmentEpsilon.Epsilon.toList
+            } from todo
+            sorry
+          | none =>
+            simp [h5]
+            suffices todo : ∃ a,
+              M.transition.stepTransition idesc = some a ∧
+              a.toSipser = {
+                p := AugmentOneState.qNeg1,
+                w := xs,
+                β := AugmentEpsilon.Epsilon.toList
+            } from todo
+            sorry
+        | x :: xs, a :: as =>
+          simp [h3, h4]
+          split
+          · sorry
+          · next r y2 hb hc hd =>
+            rw [h] at hb; simp at hb
+            rw [h2] at hb; simp at hb
+            rw [h] at hc; simp at hc
+            rw [h2] at hc; simp at hc
+            rw [h] at hd; simp at hd
+            rw [h2] at hd; simp at hd
+            simp [Predet_DPDA_IDesc.toSipser, Predet_DPDA.toSipser, Predet_DPDA.stepTransition, Sipser_DPDA.stepTransition]
+            suffices todo : ∃ a,
+              M.transition.stepTransition idesc = some a ∧
+              AugmentOneState.fromQ a.p = r ∧
+              a.w = x :: xs ∧
+              a.β = y2.toList ++ as
+              from todo
+            sorry
+          · next r y hb hc hd =>
+            rw [h] at hb; simp at hb
+            rw [h2] at hb; simp at hb
+            rw [h] at hc; simp at hc
+            rw [h2] at hc; simp at hc
+            rw [h] at hd; simp at hd
+            rw [h2] at hd
+            simp only [reduceCtorEq] at hd
+          · sorry
+          · sorry
+          · sorry
+          · sorry
+          · sorry
