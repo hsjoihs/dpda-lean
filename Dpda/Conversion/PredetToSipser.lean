@@ -327,15 +327,16 @@ theorem Predet_to_Sipser_preserves_semantics_single_step {Q S Γ}
               from todo
             sorry
           · next r y hb hc hd =>
-            rw [h] at hb; simp at hb
-            rw [h2] at hb; simp at hb
+            rw [h] at hd; simp at hd
+            rw [h2] at hd; simp at hd
+          · next ha hb hc =>
             rw [h] at hc; simp at hc
             rw [h2] at hc; simp at hc
-            rw [h] at hd; simp at hd
-            rw [h2] at hd
-            simp only [reduceCtorEq] at hd
-          · sorry
-          · sorry
-          · sorry
+          · next r y hb hc hd =>
+            rw [h] at hb; simp at hb
+            rw [h2] at hb; simp at hb
+          · next ha hb hc =>
+            rw [h] at hc; simp at hc
+            rw [h2] at hc; simp at hc
           · sorry
           · sorry
