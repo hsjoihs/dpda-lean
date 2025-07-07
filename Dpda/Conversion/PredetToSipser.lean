@@ -218,5 +218,25 @@ theorem Predet_to_Sipser_preserves_semantics_single_step {Q S Γ}
   match h : M.transition idesc.p with
   | Predet_Judge.uncondPush (α, q) =>
     simp [Predet_DPDA_IDesc.toSipser, Predet_DPDA.toSipser, Predet_DPDA.stepTransition, Sipser_DPDA.stepTransition]
-    rw [h]
-  | Predet_Judge.popAndDecideWhetherToConsume fΓ_wS => sorry
+    split
+    · next r y heq =>
+      simp [Predet_DPDA_IDesc.toSipser, Predet_DPDA.toSipser, Predet_DPDA.stepTransition, Sipser_DPDA.stepTransition]
+      have r_is_old : ∃ p, AugmentOneState.fromQ p = r := sorry
+      obtain ⟨ r_in_p, r_is_old ⟩ := r_is_old
+      use ⟨ r_in_p, idesc.w, y.toList ++ idesc.β ⟩
+      simp [r_is_old]
+      simp [h] at heq
+      obtain ⟨ h_qr, h_αy ⟩ := heq
+      unfold Predet_Transition.stepTransition
+      simp [h]
+      suffices assert : q = r_in_p ∧ α :: idesc.β = y.toList ++ idesc.β from assert
+      constructor
+      · rw [← r_is_old] at h_qr
+        simp at h_qr
+        exact h_qr
+      · rw [← h_αy]
+        simp [AugmentEpsilon.toList]
+    · next heq =>
+      sorry
+  | Predet_Judge.popAndDecideWhetherToConsume fΓ_wS =>
+    sorry
