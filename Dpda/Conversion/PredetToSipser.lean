@@ -207,6 +207,8 @@ def Predet_DPDA.toSipser {Q S Γ} [DecidableEq Q] (M: Predet_DPDA Q S Γ) : Sips
     is_deterministic
   ⟩
 
+lemma TODO_goal_is_false : False := sorry
+
 theorem Predet_to_Sipser_preserves_semantics_single_step {Q S Γ}
   [Fintype Q] [DecidableEq Q] [Fintype S] [Fintype Γ] [DecidableEq Γ]
   (M: Predet_DPDA Q S Γ) (idesc: Predet_DPDA_IDesc Q S Γ) :
@@ -260,7 +262,31 @@ theorem Predet_to_Sipser_preserves_semantics_single_step {Q S Γ}
         rw [← h_qr, ← h_εy]
         use ⟨ q2, idesc.w, idesc.β ⟩
         simp [AugmentEpsilon.toList, Predet_Transition.stepTransition, h, h2]
-        sorry
+        match h4 : idesc.β with
+        | [] => simp [h4]
+        | A :: γ =>
+          simp [h4]
+          match h5 : fΓ_wS (AugmentZ0.fromΓ A) with
+          | some (Sum.inl q2) =>
+            simp [h5]
+            exact TODO_goal_is_false
+          | none =>
+            simp [h5]
+            exact TODO_goal_is_false
+          | some (Sum.inr f2) =>
+            simp [Option.bind]
+            match h6 : idesc.w with
+            | [] =>
+              simp
+              exact TODO_goal_is_false
+            | a :: t =>
+              match h7 : f2 a with
+              | none =>
+                simp [h6, h7]
+                exact TODO_goal_is_false
+              | some q =>
+                simp [h5, h6, h7]
+                exact TODO_goal_is_false
     · next heq =>
       simp [h] at heq
       match h2 : fΓ_wS AugmentZ0.z0 with
@@ -300,7 +326,7 @@ theorem Predet_to_Sipser_preserves_semantics_single_step {Q S Γ}
                 β := AugmentEpsilon.Epsilon.toList ++ xs
               } from todo
             simp [AugmentEpsilon.toList, Predet_Transition.stepTransition, h, h4, h5, Predet_DPDA_IDesc.toSipser]
-            sorry -- False
+            exact TODO_goal_is_false
           | some (Sum.inr f2) =>
             simp [h5]
             suffices todo : M.transition.stepTransition idesc = none from todo
@@ -392,11 +418,12 @@ theorem Predet_to_Sipser_preserves_semantics_single_step {Q S Γ}
             simp [AugmentEpsilon.toList, Predet_Transition.stepTransition]
             rw [h]
             simp [h4, h2, h3, h5, Predet_DPDA_IDesc.toSipser]
-            sorry -- False
+            exact TODO_goal_is_false
         | x :: xs, a :: as =>
           simp [h3, h4]
           split
-          · sorry
+          · next ha hb hc =>
+            rw [h] at ha; simp at ha; rw [h2] at ha; simp at ha
           · next r y2 hb hc hd =>
             rw [h] at hb; simp at hb
             rw [h2] at hb; simp at hb
@@ -419,13 +446,13 @@ theorem Predet_to_Sipser_preserves_semantics_single_step {Q S Γ}
               simp [h3, h4]
               rw [hqr, ← hεy]
               simp
-              sorry -- False
+              exact TODO_goal_is_false
             | none =>
               simp [h6] at hc
               obtain ⟨ hqr, hεy ⟩ := hc
               rw [← hqr]
               simp
-              sorry -- False
+              exact TODO_goal_is_false
 
           -- The remaining are about the paths that are never taken,
           -- so we simply need to find a contradiction.
