@@ -36,10 +36,10 @@ structure Sipser_DPDA_IDesc (Q) (S) (Γ) where
 
 -- This is the version that does not depend on the `deterministic` condition.
 -- This is intended as a workaround in Lean's `motive is not type correct` error.
-def Sipser_PreDPDA.stepTransition {Q S Γ}
+def Sipser_PreDPDA.maybeStepTransition {Q S Γ}
   (M: Sipser_PreDPDA Q S Γ)
   (pwβ: Sipser_DPDA_IDesc Q S Γ)
-  : Option (Sipser_DPDA_IDesc Q S Γ) :=
+  : Option (Option (Sipser_DPDA_IDesc Q S Γ)) :=
   /-
 
   A Sipser DPDA has exactly one legal move in every situation where its stack is nonempty.
@@ -53,7 +53,7 @@ def Sipser_PreDPDA.stepTransition {Q S Γ}
     -- · consume nothing from the input
     -- · pop nothing from the stack
     -- · push y onto the stack
-    some ⟨ r, pwβ.w, y.toList ++ pwβ.β ⟩
+    some <| some ⟨ r, pwβ.w, y.toList ++ pwβ.β ⟩
   | none =>
     -- Otherwise, ∀ a x, exactly one of δ(q, a, x), δ(q, ε, x), or δ(q, a, ε) is `some`.
     -- Thus we first need to check whether the stack or the input is empty.
@@ -61,7 +61,7 @@ def Sipser_PreDPDA.stepTransition {Q S Γ}
     | [], [] =>
       -- If both the input and the stack are empty, we cannot move,
       -- since the only potential legal move, δ(q, ε, ε), turned out to be empty.
-      none
+      some <| none
     | [], x :: xs =>
       -- We cannot consume from an empty input, so our only hope is δ(q, ε, x), a transition without the input consumption.
       match M.transition (pwβ.p, AugmentEpsilon.Epsilon, AugmentEpsilon.fromChar x) with
@@ -70,10 +70,10 @@ def Sipser_PreDPDA.stepTransition {Q S Γ}
         -- move to the state r,
         -- consume nothing from the input,
         -- and push y onto the stack.
-        some ⟨ r, pwβ.w, y.toList ++ xs ⟩
+        some <| some ⟨ r, pwβ.w, y.toList ++ xs ⟩
       | none =>
         -- If δ(q, ε, x) is empty, we cannot move.
-        none
+        some <| none
     | a :: ws, [] =>
       -- If the stack is empty, our only legal option is δ(q, a, ε), a transition without the stack pop.
       match M.transition (pwβ.p, AugmentEpsilon.fromChar a, AugmentEpsilon.Epsilon) with
@@ -82,10 +82,10 @@ def Sipser_PreDPDA.stepTransition {Q S Γ}
         -- move to the state r,
         -- pop nothing from the stack,
         -- and push y onto the stack.
-        some ⟨ r, ws, y.toList ++ pwβ.β ⟩
+        some <| some ⟨ r, ws, y.toList ++ pwβ.β ⟩
       | none =>
         -- If δ(q, a, ε) is empty, we cannot move.
-        none
+        some <| none
     | a :: ws, x :: xs =>
       -- If both the input and the stack are nonempty, we have options.
       -- Exactly one of δ(q, a, x), δ(q, ε, x), or δ(q, a, ε) is `some`, and we have to choose the one that is `some`.
@@ -98,19 +98,19 @@ def Sipser_PreDPDA.stepTransition {Q S Γ}
         -- move to the state r,
         -- pop x from the stack,
         -- and push y onto the stack.
-        some ⟨ r, ws, y.toList ++ xs ⟩
+        some <| some ⟨ r, ws, y.toList ++ xs ⟩
       | none, some (r, y), none =>
         -- If δ(q, ε, x) is nonempty, we can pop x from the stack,
         -- move to the state r,
         -- consume nothing from the input,
         -- and push y onto the stack.
-        some ⟨ r, pwβ.w, y.toList ++ xs ⟩
+        some <| some ⟨ r, pwβ.w, y.toList ++ xs ⟩
       | none, none, some (r, y) =>
         -- If δ(q, a, ε) is nonempty, we can consume a from the input,
         -- move to the state r,
         -- pop nothing from the stack,
         -- and push y onto the stack.
-        some ⟨ r, ws, y.toList ++ pwβ.β ⟩
+        some <| some ⟨ r, ws, y.toList ++ pwβ.β ⟩
       | _, _, _ => none -- When the `deterministic` condition holds, this branch should never be reached.
 
 
@@ -194,3 +194,26 @@ def Sipser_DPDA.stepTransition {Q S Γ}
       | some _, none, some _   => False.elim <| by have h3 := M.deterministic pwβ.p a x; simp [exactly_one_some, hεε, hax, haε, hεx] at h3
       | none, some _, some _   => False.elim <| by have h3 := M.deterministic pwβ.p a x; simp [exactly_one_some, hεε, hax, haε, hεx] at h3
       | none, none, none       => False.elim <| by have h3 := M.deterministic pwβ.p a x; simp [exactly_one_some, hεε, hax, haε, hεx] at h3
+
+-- Trivial by definition, but this helps getting around the nasty `motive is not type correct` errors
+lemma maybeStepTransition_is_maybe_stepTransition {Q S Γ}
+  (M: Sipser_DPDA Q S Γ)
+  (pwβ: Sipser_DPDA_IDesc Q S Γ)
+  : some (M.stepTransition pwβ) = M.pda.maybeStepTransition pwβ := by
+  unfold Sipser_DPDA.stepTransition Sipser_PreDPDA.maybeStepTransition
+  split
+  · next r y heq =>
+    match h2 : M.pda.transition (pwβ.p, AugmentEpsilon.Epsilon, AugmentEpsilon.Epsilon) with
+    | some (r2, y2) =>
+      simp
+      rw [heq] at h2
+      simp at h2
+      rw [h2.left, h2.right]
+      constructor
+      · rfl
+      · rfl
+    | none =>
+      rw [heq] at h2
+      simp at h2
+  · next heq =>
+    grind only [cases eager Prod]
