@@ -63,7 +63,7 @@ theorem Le1P2_to_CPSP_preserves_semantics_single_step {Q S Γ}
     match h2 : M.transition idesc.p with
     | Le1P2_Judge.observeInput wf_S_wΓ =>
       simp [
-        Le1P2_Transition.stepTransition, Option.map_none,
+        Le1P2_Transition.stepTransition,
         CPSP_Transition.stepTransition,
         Le1P2_DPDA_IDesc.toCPSP,
         lambdaForObserveInput,
@@ -72,10 +72,10 @@ theorem Le1P2_to_CPSP_preserves_semantics_single_step {Q S Γ}
       simp [h2, transposedEmbedding, foo, Option.bind, wobZ, wob]
       match h3 : wf_S_wΓ with
       | WobblyFn.noWant v =>
-        simp [h3]
+        simp
         match h4 : v with
         | WobblyFn.noWant v2 =>
-          simp only [List.append_nil, Option.map_some,
+          simp only [Option.map_some,
             Le1P2_DPDA_IDesc.toCPSP]
           match idesc.β with
           | [] => simp
@@ -88,51 +88,51 @@ theorem Le1P2_to_CPSP_preserves_semantics_single_step {Q S Γ}
             match h6 : idesc.β with
             | [] => simp
             | A :: γ =>
-              simp [h6]
+              simp
               match h7 : f2 (AugmentZ0.fromΓ A) with
               | none =>
                 simp only [Option.map_none]
               | some v =>
                 simp only [Option.map_some, Le1P2_DPDA_IDesc.toCPSP]
           | some v =>
-            simp only [List.append_nil, Option.map_some, Le1P2_DPDA_IDesc.toCPSP]
+            simp only [Option.map_some]
             match h6 : idesc.β with
             | [] =>
               unfold Le1P2_DPDA_IDesc.toCPSP
               simp
             | A :: γ =>
-              simp [h6]
+              simp
               match h7 : f2 (AugmentZ0.fromΓ A) with
               | none =>
-                simp [h7]
+                simp
               | some v =>
                 simp only [Option.map_some, Le1P2_DPDA_IDesc.toCPSP]
       | WobblyFn.want f =>
-        simp [h3]
+        simp
         match h4 : idesc.w with
         | [] =>
-          simp [h4, Option.map_none]
+          simp [Option.map_none]
           match h6 : idesc.β with
             | [] => rfl
             | _ :: _ => rfl
         | A :: t =>
-          simp [h4, Option.map_some]
+          simp
           match h5 : f A with
           | none =>
-            simp [h5, Option.map_none]
+            simp
             match h6 : idesc.β with
             | [] => rfl
             | _ :: _ => rfl
           | some v =>
-            simp [h5, Option.map_some]
+            simp
             match h6 : v with
             | WobblyFn.noWant v =>
-              simp [h6, Le1P2_DPDA_IDesc.toCPSP, foo, lambdaForObserveInput]
+              simp [Le1P2_DPDA_IDesc.toCPSP, foo]
               match h6 : idesc.β with
               | _ :: _ => rfl
               | [] => simp
             | WobblyFn.want f =>
-              simp [h6, Le1P2_DPDA_IDesc.toCPSP, foo, lambdaForObserveInput]
+              simp [foo]
               match h7 : f AugmentZ0.z0 with
               | none =>
                 simp only [Option.map_none]
@@ -146,8 +146,7 @@ theorem Le1P2_to_CPSP_preserves_semantics_single_step {Q S Γ}
                   | some v =>
                     simp [Le1P2_DPDA_IDesc.toCPSP]
               | some y =>
-                simp only [lambdaForObserveInput, List.append_nil, Option.map_some,
-                  Le1P2_DPDA_IDesc.toCPSP]
+                simp only [Option.map_some]
                 match h6 : idesc.β with
                 | [] =>
                   simp [Le1P2_DPDA_IDesc.toCPSP]
@@ -163,23 +162,23 @@ theorem Le1P2_to_CPSP_preserves_semantics_single_step {Q S Γ}
         CPSP_Transition.stepTransition, h2]
       match h4 : idesc.β with
       | [] =>
-        simp [Option.map_none]
+        simp
         match h3 : trivialEmbedding f_Γ_wSq AugmentZ0.z0 with
         | CPSP_Judge.immediate none =>
-          simp [h3]
+          simp
           unfold Le1P2_Transition.stepTransition
           rw [h2, h4]
           simp [valForUncondPop1]
           intro wf h Γε q u
           unfold wob
-          simp [trivialEmbedding, WobblyFn.fmap] at h3
+          simp [trivialEmbedding] at h3
           match h5 : wf with
           | WobblyFn.noWant v =>
-            simp [h5]
+            simp
             intro h6 h7
             simp [h, WobblyFn.fmap] at h3
           | WobblyFn.want f =>
-            simp [h5]
+            simp
             match idesc.w with
             | [] =>
               simp
@@ -195,18 +194,18 @@ theorem Le1P2_to_CPSP_preserves_semantics_single_step {Q S Γ}
           simp [trivialEmbedding] at h3
           match h6 : f_Γ_wSq AugmentZ0.z0 with
           | none =>
-            simp [h6]
+            simp
             simp [h6] at h3
           | some (WobblyFn.noWant v) =>
-            simp [h6, WobblyFn.fmap]
+            simp
             simp [h6, WobblyFn.fmap] at h3
             exact ⟨ h3.right, h3.left ⟩
           | some (WobblyFn.want f) =>
-            simp [h6, WobblyFn.fmap]
+            simp
             simp [h6, WobblyFn.fmap] at h3
         | CPSP_Judge.step f2 =>
-          simp [h3]
-          simp [trivialEmbedding, WobblyFn.fmap] at h3
+          simp
+          simp [trivialEmbedding] at h3
           match h6 : f_Γ_wSq AugmentZ0.z0 with
           | none =>
             rw [h6] at h3
@@ -219,16 +218,16 @@ theorem Le1P2_to_CPSP_preserves_semantics_single_step {Q S Γ}
             simp [h2, h4, valForUncondPop1, Option.bind, wob, h6]
             match h7 : idesc.w with
             | [] =>
-              simp [h7, Option.map_none]
+              simp [Option.map_none]
             | A :: t =>
-              simp [h7, Option.map_some]
+              simp
               have h8 := congr_fun h3 A
               rw [← h8]
               match h9 : f A with
               | none =>
-                simp [h9, Option.map_none]
+                simp [Option.map_none]
               | some u =>
-                simp [h9, Option.map_some, Le1P2_DPDA_IDesc.toCPSP]
+                simp [Option.map_some, Le1P2_DPDA_IDesc.toCPSP]
       | A :: γ =>
         simp [Le1P2_Transition.stepTransition, h2, h4, valForUncondPop2, Option.bind, wob]
         match h3 : f_Γ_wSq (AugmentZ0.fromΓ A) with
@@ -237,12 +236,12 @@ theorem Le1P2_to_CPSP_preserves_semantics_single_step {Q S Γ}
         | some (WobblyFn.noWant v) =>
           simp [Option.map_some, WobblyFn.fmap, h3, Le1P2_DPDA_IDesc.toCPSP, trivialEmbedding]
         | some (WobblyFn.want f) =>
-          simp [Option.map_some, WobblyFn.fmap, h3, Le1P2_DPDA_IDesc.toCPSP, trivialEmbedding]
+          simp [Option.map_some, WobblyFn.fmap, h3, trivialEmbedding]
           match h5 : idesc.w with
           | [] =>
-            simp [h5, Option.map_none]
+            simp [Option.map_none]
           | A :: t =>
-            simp [h5, Option.map_some]
+            simp
             match h6 : f A with
               | none =>
                 simp

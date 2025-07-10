@@ -33,7 +33,7 @@ instance {Q R} [Fintype Q] [Fintype R] [DecidableEq Q] [DecidableEq R] : Fintype
   elems := Finset.image QExpand.originalQ Finset.univ ∪ Finset.image QExpand.newQ Finset.univ
   complete := by
     intro x
-    simp only [Finset.mem_union, Finset.mem_image, QExpand.originalQ, QExpand.newQ]
+    simp only [Finset.mem_union, Finset.mem_image]
     cases x with
     | originalQ q => left; use q; simp
     | newQ r => right; use r; simp
@@ -64,7 +64,7 @@ def myDecEq {Q S Γ} [Fintype Q] [Fintype S] [Fintype Γ] [DecidableEq Q] [Decid
   | QExpand.newQ ⟨ qa, qb, G, s, j ⟩, QExpand.newQ ⟨ qa', qb', G', s', j' ⟩ =>
     if h2 : (qa, qb, G, s, (↑j : Nat)) = (qa', qb', G', s', (↑j' : Nat)) then
       isTrue (by
-        simp [five_tuple] at h2
+        simp at h2
         apply congr_arg
         obtain ⟨ rfl, rfl, rfl, rfl, hj ⟩ := h2
         simp [Fin.ext_iff, hj]

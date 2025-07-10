@@ -219,7 +219,7 @@ theorem Predet_to_Sipser_preserves_semantics_single_step_except_for_when_reachin
     simp [Predet_DPDA_IDesc.toSipser, Predet_DPDA.toSipser, Predet_DPDA.stepTransition, Sipser_DPDA.stepTransition]
     split
     · next r y heq =>
-      simp [Predet_DPDA_IDesc.toSipser, Predet_DPDA.toSipser, Predet_DPDA.stepTransition, Sipser_DPDA.stepTransition]
+      simp [Predet_DPDA_IDesc.toSipser]
       have r_is_old : ∃ p, AugmentOneState.fromQ p = r := by
         simp [h] at heq
         use q
@@ -252,7 +252,7 @@ theorem Predet_to_Sipser_preserves_semantics_single_step_except_for_when_reachin
       | some (Sum.inl q2) =>
         simp [h2] at heq
         obtain ⟨ h_qr, h_εy ⟩ := heq
-        simp [Predet_DPDA_IDesc.toSipser, Predet_DPDA.toSipser, Predet_DPDA.stepTransition, Sipser_DPDA.stepTransition]
+        simp [Predet_DPDA_IDesc.toSipser]
         have r_is_old : ∃ p, AugmentOneState.fromQ p = r := by use q2
         obtain ⟨ r_in_p, r_is_old ⟩ := r_is_old
         left
@@ -265,16 +265,16 @@ theorem Predet_to_Sipser_preserves_semantics_single_step_except_for_when_reachin
         use ⟨ q2, idesc.w, idesc.β ⟩
         simp [AugmentEpsilon.toList, Predet_Transition.stepTransition, h, h2]
         match h4 : idesc.β with
-        | [] => simp [h4]
+        | [] => simp
         | A :: γ =>
-          simp [h4]
+          simp
           -- Looks like this branch should not be reachable. But why?
           match h5 : fΓ_wS (AugmentZ0.fromΓ A) with
           | some (Sum.inl q2) =>
-            simp [h5]
+            simp
             exact TODO_goal_is_false
           | none =>
-            simp [h5]
+            simp
             exact TODO_goal_is_false
           | some (Sum.inr f2) =>
             simp [Option.bind]
@@ -285,10 +285,10 @@ theorem Predet_to_Sipser_preserves_semantics_single_step_except_for_when_reachin
             | a :: t =>
               match h7 : f2 a with
               | none =>
-                simp [h6, h7]
+                simp [h7]
                 exact TODO_goal_is_false
               | some q =>
-                simp [h5, h6, h7]
+                simp [h7]
                 exact TODO_goal_is_false
     · next heq =>
       simp [h] at heq
@@ -304,14 +304,14 @@ theorem Predet_to_Sipser_preserves_semantics_single_step_except_for_when_reachin
             Option.bind_eq_bind, Option.bind_some,
             Option.bind_none, Option.map_none]
         | [], x :: xs =>
-          simp [h3, h4]
+          simp
           rw [h]
           simp
           rw [h2]
           simp
           match h5 : fΓ_wS (AugmentZ0.fromΓ x) with
           | some (Sum.inl q2) =>
-            simp [h5]
+            simp
             suffices todo : ∃ a,
               M.transition.stepTransition idesc = some a ∧
               a.toSipser = {
@@ -322,20 +322,20 @@ theorem Predet_to_Sipser_preserves_semantics_single_step_except_for_when_reachin
             simp [AugmentEpsilon.toList, Predet_Transition.stepTransition, h, h4, h5, Predet_DPDA_IDesc.toSipser]
             exact h3
           | none =>
-            simp [h5] -- qNeg1 branch
+            simp  -- qNeg1 branch
           | some (Sum.inr f2) =>
-            simp [h5]
+            simp
             suffices todo : M.transition.stepTransition idesc = none from todo
             simp only [Predet_Transition.stepTransition, h, h4, h5, h3, Option.bind_eq_bind,
               Option.bind_some, Option.bind_none]
         | x :: xs, [] =>
-          simp [h3, h4]
+          simp
           rw [h]
           simp
           rw [h2]
           simp
           suffices todo : M.transition.stepTransition idesc = none from todo
-          simp [AugmentEpsilon.toList, Predet_Transition.stepTransition, h, h4, Predet_DPDA_IDesc.toSipser]
+          simp [Predet_Transition.stepTransition, h, h4]
           constructor
           · intro qa
             simp [h2]
@@ -344,7 +344,7 @@ theorem Predet_to_Sipser_preserves_semantics_single_step_except_for_when_reachin
             rw [h2] at hf
             simp at hf -- contradiction
         | x :: xs, a :: as =>
-          simp [h]
+          simp
           split
           · next ha hb hc =>
               next r y =>
@@ -359,15 +359,15 @@ theorem Predet_to_Sipser_preserves_semantics_single_step_except_for_when_reachin
               | some (Sum.inr f2) =>
                 rw [h6] at ha; simp at ha
                 rw [h6] at hc; simp at hc
-                simp [AugmentEpsilon.toList, Predet_Transition.stepTransition, h, h4, h6, h3, Predet_DPDA_IDesc.toSipser]
+                simp [Predet_Transition.stepTransition, h, h4, h6, h3, Predet_DPDA_IDesc.toSipser]
                 match h7 : f2 x with
                 | none =>
-                  simp [h7]
+                  simp
                   rw [h7] at ha; simp at ha
                   rw [← ha.left, ← ha.right]
-                  simp [AugmentEpsilon.toList]
+                  simp
                 | some q =>
-                  simp [h7]
+                  simp
                   simp [h7] at ha
                   rw [← ha.left, ← ha.right]
                   simp
@@ -385,15 +385,15 @@ theorem Predet_to_Sipser_preserves_semantics_single_step_except_for_when_reachin
               rw [h6] at ha; simp at ha
               rw [h6] at hc; simp at hc
               rw [← hc.left, ← hc.right]
-              simp [AugmentEpsilon.toList]
+              simp
               use { p :=  q2, w := xs, β := a :: as }
-              simp [Predet_DPDA_IDesc.toSipser, Predet_Transition.stepTransition, h, h3, h4, h2, h6]
+              simp [Predet_DPDA_IDesc.toSipser, Predet_Transition.stepTransition, h, h3, h4, h6]
               exact TODO_goal_is_false
             | none =>
               rw [h6] at ha; simp at ha
               rw [h6] at hc; simp at hc
               rw [← hc.left, ← hc.right]
-              simp [AugmentEpsilon.toList, Predet_DPDA_IDesc.toSipser]
+              simp [Predet_DPDA_IDesc.toSipser]
             | some (Sum.inr f2) =>
               rw [h6] at ha; simp at ha
               rw [h6] at hc; simp at hc
@@ -445,26 +445,26 @@ theorem Predet_to_Sipser_preserves_semantics_single_step_except_for_when_reachin
           simp [Predet_Transition.stepTransition, h, h4, h2, h3, Option.bind_eq_bind, Option.bind_some,
             Option.bind_none, Option.map_none]
         | [], x :: xs =>
-          simp [h3, h4]
+          simp
           rw [h]
           simp
           rw [h2]
           simp
           suffices assert : M.transition.stepTransition idesc = none from assert
-          simp [Predet_Transition.stepTransition, h, h4, h2, h3]
+          simp [Predet_Transition.stepTransition, h, h4, h3]
           intro qa
           suffices todo : ¬fΓ_wS (AugmentZ0.fromΓ x) = some (Sum.inl qa) from todo
           intro h5
           exact TODO_goal_is_false
         | x :: xs, [] =>
-          simp [h3, h4]
+          simp
           rw [h]
           simp
           rw [h2]
           simp
           match h5 : f2 x with
           | some q =>
-            simp [h5]
+            simp
             suffices todo : ∃ a,
               M.transition.stepTransition idesc = some a ∧
               a.toSipser = {
@@ -476,9 +476,9 @@ theorem Predet_to_Sipser_preserves_semantics_single_step_except_for_when_reachin
             rw [h]
             simp [h4, h2, h3, h5, Predet_DPDA_IDesc.toSipser]
           | none =>
-            simp [h5]
+            simp
         | x :: xs, a :: as =>
-          simp [h3, h4]
+          simp
           split
           · next ha hb hc =>
             rw [h] at ha; simp at ha; rw [h2] at ha; simp at ha
@@ -489,22 +489,22 @@ theorem Predet_to_Sipser_preserves_semantics_single_step_except_for_when_reachin
             rw [h2] at hc; simp at hc
             rw [h] at hd; simp at hd
             rw [h2] at hd; simp at hd
-            simp [Predet_DPDA_IDesc.toSipser, Predet_DPDA.toSipser, Predet_DPDA.stepTransition, Sipser_DPDA.stepTransition]
+            simp [Predet_DPDA_IDesc.toSipser]
             match h6 : f2 x with
             | some q =>
               simp [h6] at hc
               obtain ⟨ hqr, hεy ⟩ := hc
               rw [← hqr, ← hεy]
-              simp [h3, h4]
+              simp
               use ⟨  q , x :: xs, as ⟩
-              simp [Predet_Transition.stepTransition, Sipser_DPDA.stepTransition, h, h2, h3, h4, h6]
+              simp [Predet_Transition.stepTransition, h, h3, h4]
               match h7 : (fΓ_wS (AugmentZ0.fromΓ a)) with
               | some (Sum.inl q2) =>
-                simp [h7]
+                simp
                 suffices todo : q2 = q from todo
                 sorry
               | some (Sum.inr f3) =>
-                simp [h7]
+                simp
                 sorry -- quite fishy
               | none => sorry
             | none =>

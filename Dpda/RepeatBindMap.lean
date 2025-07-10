@@ -27,7 +27,7 @@ lemma repeat_bind_map2 {m} [Monad m] [LawfulMonad m] α β
   Nat.repeat (· >>= mfβ) n (pure (α2β a)) = α2β <$> Nat.repeat (· >>= mfα) n (pure a) := by
   induction n with
   | zero =>
-    simp only [Nat.repeat, pure, bind_pure]
+    simp only [Nat.repeat]
     rw [map_pure]
   | succ n ih =>
     simp only [Nat.repeat, ih, bind_map_left, map_bind, th]

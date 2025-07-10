@@ -101,7 +101,7 @@ theorem CPSP_to_Hopcroft_preserves_semantics_single_step {Q S Γ}
         cases h2 : idesc.w with
         | nil => simp only [Option.map_none]
         | cons a x =>
-          simp only [h2]
+          simp only
           cases h3 : f a with
           | none =>
             simp only [Option.map_none]

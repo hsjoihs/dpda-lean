@@ -326,28 +326,28 @@ theorem Hopcroft_to_CPSP_preserves_semantics {Q S Γ} [Fintype Q] [DecidableEq Q
       rw [ha]
       match h2 : Nat.repeat (· >>= M.stepTransition) n (some a) with
       | some ⟨p2, w2, β2⟩ =>
-        simp only [Hopcroft_DPDA_IDesc.toCPSP, Hopcroft_DPDA.toCPSP]
+        simp only [Hopcroft_DPDA.toCPSP]
         rw [hk2] at hk
         simp only [Hopcroft_DPDA_IDesc.toCPSP, CPSP_Transition.stepTransition,
           Hopcroft_DPDA.toCPSP, Option.some.injEq, CPSP_DPDA_IDesc.mk.injEq,
-          AugmentOneState.fromQ.injEq, some_bind, Option.pure_def, Option.some.injEq, imp_self] at hk
+          AugmentOneState.fromQ.injEq, some_bind, Option.pure_def, Option.some.injEq] at hk
         obtain ⟨ hp, hw, hβ ⟩ := hk
         rw [← hp, ← hw, ← hβ]
         have haa : (a = ⟨ a.p, a.w, a.β ⟩ ) := by rfl
         rw [← haa]
         rw [h2]
-        simp only [Option.map_some, Finset.mem_image]
+        simp only [Finset.mem_image]
         apply decide_and
         · unfold Hopcroft_DPDA_IDesc.toCPSP
           simp only
         · unfold Hopcroft_DPDA_IDesc.toCPSP
           simp only [AugmentOneState.fromQ.injEq, exists_eq_right]
       | none =>
-        simp only [Hopcroft_DPDA_IDesc.toCPSP, Hopcroft_DPDA.toCPSP]
+        simp only [Hopcroft_DPDA.toCPSP]
         rw [hk2] at hk
         simp only [Hopcroft_DPDA_IDesc.toCPSP, CPSP_Transition.stepTransition,
           Hopcroft_DPDA.toCPSP, Option.some.injEq, CPSP_DPDA_IDesc.mk.injEq,
-          AugmentOneState.fromQ.injEq, some_bind, Option.pure_def, Option.some.injEq, imp_self] at hk
+          AugmentOneState.fromQ.injEq, some_bind, Option.pure_def, Option.some.injEq] at hk
         obtain ⟨ hp, hw, hβ ⟩ := hk
         rw [← hp, ← hw, ← hβ]
         have haa : (a = ⟨ a.p, a.w, a.β ⟩ ) := by rfl
@@ -355,7 +355,7 @@ theorem Hopcroft_to_CPSP_preserves_semantics {Q S Γ} [Fintype Q] [DecidableEq Q
         rw [h2]
         simp only [Option.map_eq_map, Option.map_none]
     · rw [hk2] at hk
-      simp only [Hopcroft_DPDA_IDesc.toCPSP, Hopcroft_DPDA.toCPSP, CPSP_Transition.stepTransition, Option.pure_def, Option.some.injEq, imp_self, some_bind] at hk
+      simp only [Hopcroft_DPDA_IDesc.toCPSP, Hopcroft_DPDA.toCPSP, CPSP_Transition.stepTransition, Option.pure_def, Option.some.injEq, some_bind] at hk
       push_neg at hk
       have h3 := hk ⟨ M.pda.q0,  w,  [M.pda.z0] ⟩
       contrapose! h3
